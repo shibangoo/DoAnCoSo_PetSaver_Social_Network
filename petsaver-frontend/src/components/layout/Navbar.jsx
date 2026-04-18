@@ -1,18 +1,23 @@
+import { HiOutlineHome } from "react-icons/hi";
+import { HiOutlineBell } from "react-icons/hi";
+import { HiOutlineUser } from "react-icons/hi";
+
 export default function Navbar() {
   return (
-    <div className="bg-white shadow px-6 py-3 flex items-center justify-between">
-      <h1 className="text-blue-500 font-bold text-xl">PetSaver</h1>
+    <div className="bg-white shadow px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+      <h1 className="text-blue-600 font-bold text-xl">PetSaver</h1>
 
       <input
-        className="bg-gray-100 px-4 py-2 rounded-full w-1/3 outline-none"
+        type="text"
         placeholder="Tìm kiếm..."
+        className="bg-gray-100 px-4 py-2 rounded-full w-96 outline-none"
       />
 
-      <div className="flex gap-4 text-xl">
-        <span>🏠</span>
-        <span>🔔</span>
-        <span>👤</span>
-      </div>
+      <div className="flex items-center gap-6 text-gray-600">
+        <HiOutlineHome className="text-2xl cursor-pointer hover:text-blue-500 transition" />
+        <HiOutlineBell className="text-2xl cursor-pointer hover:text-blue-500 transition" />
+        <HiOutlineUser className="text-2xl cursor-pointer hover:text-blue-500 transition" />
+</div>
     </div>
   );
 }
