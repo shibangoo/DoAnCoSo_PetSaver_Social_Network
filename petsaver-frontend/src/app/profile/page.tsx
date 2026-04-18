@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import API from "@/services/api";
+import API from "@/services/api.js";
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);

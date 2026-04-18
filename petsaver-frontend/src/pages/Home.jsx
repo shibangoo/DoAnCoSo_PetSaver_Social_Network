@@ -1,6 +1,26 @@
-<div class="max-w-2xl mx-auto mt-5">
-  <div class="bg-white shadow p-4 rounded-lg">
-    <h2 class="font-bold">Bài viết</h2>
-    <p>Nội dung...</p>
-  </div>
-</div>
+import Navbar from "../components/layout/Navbar";
+import CreatePost from "../components/post/CreatePost";
+import PostCard from "../components/post/PostCard";
+
+export default function Home() {
+const posts = [
+    {
+      author: { name: "Hoàng" },
+      content: "Hôm nay bé cún rất dễ thương 🐶",
+    },
+  ];
+
+  return (
+    <div className="bg-[#f0f2f5] min-h-screen">
+      <Navbar />
+
+      <div className="max-w-2xl mx-auto py-6">
+        <CreatePost />
+
+        {posts.map((post, i) => (
+          <PostCard key={i} post={post} />
+        ))}
+      </div>
+    </div>
+  );
+}
