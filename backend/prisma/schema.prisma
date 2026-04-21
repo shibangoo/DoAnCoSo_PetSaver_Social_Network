@@ -1,0 +1,48 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Bảng Người dùng
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String    // Sẽ lưu mật khẩu đã được mã hóa
+  displayName String?   // Có dấu ? nghĩa là không bắt buộc (điền sau khi đăng ký)
+  avatar      String?
+  dob         DateTime?
+  
+  posts       Post[]    // 1 user có thể đăng nhiều bài
+  pets        Pet[]     // 1 user có thể nuôi nhiều thú cưng
+}
+
+// Bảng Thú cưng
+model Pet {
+  id      Int      @id @default(autoincrement())
+  name    String
+  avatar  String?
+  ownerId Int      
+  
+  // THÊM onDelete: NoAction VÀO DÒNG NÀY
+  owner   User     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  
+  posts   Post[]   @relation("PetToPost") 
+}
+
+// Bảng Bài viết
+model Post {
+  id          Int      @id @default(autoincrement())
+  content     String?
+  image       String?
+  authorId    Int
+  
+  // THÊM onDelete: NoAction VÀO DÒNG NÀY
+  author      User     @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  
+  taggedPets  Pet[]    @relation("PetToPost") 
+  createdAt   DateTime @default(now())
+}
