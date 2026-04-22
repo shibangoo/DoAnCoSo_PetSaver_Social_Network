@@ -70,3 +70,15 @@ exports.reserPassword = async (req, res) => {
 
     res.status(200).json({ message: "Doi mat khau thanh cong" });
 }
+
+exports.getAllUsers = async (req, res) => {
+    try {
+        //lay users nhung giau mk
+        const users = await prisma.user.findMany({
+            select: { id: true, email: true, role: true, displayName: true, password: true }
+        });
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: "Loi khi lay danh sach" });
+    }
+}

@@ -3,7 +3,7 @@ require('dotenv').config(); // Đọc các biến bảo mật từ file .env
 
 const app = express();
 const cors = require('cors');
-app.use(core()); //cho phep fe goi fe thoai mai
+app.use(cors()); //cho phep fe goi fe thoai mai
 
 // Middleware tích hợp sẵn của Express giúp ứng dụng hiểu được dữ liệu JSON gửi lên từ Frontend
 app.use(express.json());

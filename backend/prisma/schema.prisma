@@ -15,7 +15,7 @@ model User {
   displayName String?   // Có dấu ? nghĩa là không bắt buộc (điền sau khi đăng ký)
   avatar      String?
   dob         DateTime?
-  
+  role        String    @default("USER")
   posts       Post[]    // 1 user có thể đăng nhiều bài
   pets        Pet[]     // 1 user có thể nuôi nhiều thú cưng
 }
