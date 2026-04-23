@@ -18,6 +18,8 @@ model User {
   role        String    @default("USER")
   posts       Post[]    // 1 user có thể đăng nhiều bài
   pets        Pet[]     // 1 user có thể nuôi nhiều thú cưng
+  reactions   Reaction[]
+  comments    Comment[]
 }
 
 // Bảng Thú cưng
@@ -45,4 +47,43 @@ model Post {
   
   taggedPets  Pet[]    @relation("PetToPost") 
   createdAt   DateTime @default(now())
+  reactions   Reaction[]
+  comments    Comment[]
+}
+
+// Bảng Cảm xúc (Like / Dislike)
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  type      String   // Sẽ lưu chữ "LIKE" hoặc "DISLIKE"
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+
+  // Liên kết: Ai thả cảm xúc? Thả vào bài nào?
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade) 
+  // Dùng Cascade ở bài viết: Nghĩa là nếu xóa bài viết thì mọi Like của bài đó bay màu theo.
+
+  // Đảm bảo 1 người chỉ được Like hoặc Dislike 1 lần cho 1 bài viết
+  @@unique([userId, postId]) 
+}
+
+// Bảng Bình luận (Hỗ trợ Nested Comments)
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  userId    Int
+  postId    Int
+  
+  // parentId dùng để biết bình luận này đang trả lời cho bình luận nào. 
+  // Nếu là null (trống) thì nó là bình luận gốc.
+  parentId  Int?     
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  // Thiết lập quan hệ tự chỉ cho bình luận lồng nhau
+  parent    Comment?  @relation("NestedComments", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("NestedComments")
 }

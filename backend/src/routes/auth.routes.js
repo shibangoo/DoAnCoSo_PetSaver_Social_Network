@@ -7,7 +7,7 @@ const isAdmin = require('../middlewares/admin.middleware.js');
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-router.put('/reset-password', authController.reserPassword);
+router.put('/reset-password', authController.resetPassword);
 
 //duong dan xem dc cua admin
 router.get('/all-users', verifyToken, isAdmin, authController.getAllUsers);

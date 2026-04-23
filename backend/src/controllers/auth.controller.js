@@ -55,7 +55,7 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.reserPassword = async (req, res) => {
+exports.resetPassword = async (req, res) => {
     const { email, newPassword } = req.body;
 
     //Hash mk moi
