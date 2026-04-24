@@ -4,6 +4,7 @@ import Profile from "./pages/Profile";
 import Login from "./app/login/Login";
 import Register from "./app/register/Register";
 import Forgot from "./app/forgot/Forgot";
+import "./styles/index.css";
 
 
 function App() {

@@ -7,6 +7,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const handleLogout = () => {
+  localStorage.removeItem("token");
+  navigate("/");
+};
   return (
     <div className="bg-white shadow px-6 py-3 flex items-center justify-between sticky top-0 z-50">
       <h1 className="text-blue-600 font-bold text-xl">PetSaver</h1>

@@ -8,7 +8,14 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="/home" element={<Home />} />
+        <Route
+            path="/home"
+            element={
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+  }
+        />
         <Route path="/profile/:id" element={<Profile />} />
       </Routes>
     </BrowserRouter>
