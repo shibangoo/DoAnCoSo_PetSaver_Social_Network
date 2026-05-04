@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  password    String
+  displayName String?
+  avatar      String?
+  dob         DateTime?                                       
+  role        String     @default("USER")
+  comments    Comment[]
+  pets        Pet[]
+  posts       Post[]
+  reactions   Reaction[]
+}
+
+model Pet {
+  id      Int     @id @default(autoincrement())
+  name    String
+  avatar  String?
+  ownerId Int
+  owner   User    @relation(fields: [ownerId], references: [id], onUpdate: NoAction)
+  posts   Post[]  @relation("PetToPost")
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  content    String?
+  image      String?
+  authorId   Int
+  createdAt  DateTime   @default(now())
+  comments   Comment[]
+  author     User       @relation(fields: [authorId], references: [id], onUpdate: NoAction)
+  reactions  Reaction[]
+  taggedPets Pet[]      @relation("PetToPost")
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  type      String
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  userId    Int
+  postId    Int
+  parentId  Int?
+  createdAt DateTime  @default(now())
+  parent    Comment?  @relation("NestedComments", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("NestedComments")
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+}
