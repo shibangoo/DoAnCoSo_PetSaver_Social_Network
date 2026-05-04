@@ -1,9 +1,9 @@
-import Navbar from "../components/layout/Navbar";
+import Layout from "../components/layout/Layout";
 import CreatePost from "../components/post/CreatePost";
 import PostCard from "../components/post/PostCard";
 
 export default function Home() {
-const posts = [
+  const posts = [
     {
       author: { name: "Hoàng" },
       content: "Hôm nay bé cún rất dễ thương 🐶",
@@ -11,16 +11,14 @@ const posts = [
   ];
 
   return (
-    <div className="bg-[#f0f2f5] min-h-screen">
-      <Navbar />
+    <Layout>
 
-      <div className="max-w-2xl mx-auto py-6">
-        <CreatePost />
+      <CreatePost />
 
-        {posts.map((post, i) => (
-          <PostCard key={i} post={post} />
-        ))}
-      </div>
-    </div>
+      {posts.map((post, i) => (
+        <PostCard key={i} post={post} />
+      ))}
+
+    </Layout>
   );
 }

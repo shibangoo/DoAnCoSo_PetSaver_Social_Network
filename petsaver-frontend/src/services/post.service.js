@@ -8,9 +8,9 @@ export const createPost = (data) =>
   API.post("/posts/create", data);
 
 // like bài viết
-export const likePost = (postId) =>
-  API.post(`/posts/${postId}/like`);
+export const reactPost = (postId, type) =>
+  API.post(`/posts/${postId}/react`, { type });
 
 // comment
 export const commentPost = (postId, content) =>
-  API.post(`/posts/${postId}/comment`, { content });
+  API.post(`/posts/${postId}/comments`, { content });
