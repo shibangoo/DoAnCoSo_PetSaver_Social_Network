@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const AppError = require('../utils/AppError');
 
 exports.createPost = async (req, res) => {
     try {
@@ -106,50 +107,79 @@ exports.toggleReaction = async (req, res) => {
     }
 };
 
-exports.addComment = async (req, res) => {
+exports.addComment = async (req, res, next) => {
     try {
         const userId = req.user.userId;
         const postId = parseInt(req.params.postId);
         //lay noi dung binh luan va parentId(neu co)
         const { content, parentId } = req.body;
-        if (!content) {
-            return res.status(400).json({ message: "Noi dung binh luan khong duoc de trong" })
+        //ktr noi dung rong
+        if (!content || content.trim() === "") {
+            return next(new AppError('Noi dung binh luan khong duoc de trong', 400, 'CONTENT_IS_NULL'));
         }
+        //ktr bai viet co ton tai khong
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
+        });
+        if (!post) {
+            return next(new AppError('Bai viet khong ton tai hoac da bi xoa', 404, 'POST_NOT_FOUND'));
+        }
+        // neu co parentId la dang reply comment
+        if (parentId) {
+            const parentComment = await prisma.comment.findUnique({
+                where: { id: parseInt(parentId) }
+            });
+            //neu parentComment khong ton tai
+            if (!parentComment) {
+                return next(new AppError('Binh luan ban dang tra loi khong ton tai', 404, 'PARENTS_COMMENT_NOT_FOUND'));
+            }
+            //neu parentComment o bai viet khac
+            if (parentComment.postId !== postId) {
+                return next(new AppError('Binh luan cha khong thuoc bai viet nay', 400, 'PARENTS_COMMENT_NOT_FOUND_IN_THIS_POST'));
+            }
+        }
+        //khong co loi gi thi cho comment
         const newComment = await prisma.comment.create({
             data: {
                 content: content,
                 userId: userId,
                 postId: postId,
-                parentId: parentId || null
-            },
-            include: {
-                user: { select: { id: true, displayName: true, avatar: true } }
+                // Nếu parentId có giá trị thì ép kiểu về số nguyên, nếu không thì để null
+                parentId: parentId ? parseInt(parentId) : null
             }
         });
-        res.status(201).json({ message: "Da binh luan", comment: newComment });
+        return status(201).json({ message: "Binh luan thanh cong", comment: newComment });
     } catch (error) {
-        console.error("loi khi binh luan", error);
-        res.status(500).json({ error: "Loi he thong khi xu ly binh luan" });
+        next(error);
     }
 };
 
 //Lay danh sach binh luan cua 1 bai viet
-exports.getPostComments = async (req, res) => {
+exports.getPostComments = async (req, res, next) => {
     try {
         const postId = parseInt(req.params.postId);
+        //ktr binh luan co NaN khong 
+        if (isNaN(postId)) {
+            return next(new AppError('ID bài viết không hợp lệ', 400, 'INVALID_POST_ID'));
+        }
+        //kiem tra bai viet co ton tai khong
+        const post = await prisma.post.findUnique({ where: { id: postId } });
+        if (!post) {
+            return next(new AppError('Bài viết không tồn tại hoặc đã bị xóa', 404, 'POST_NOT_FOUND'));
+        }
         //lay binh luan goc va keo luon cac binh luan con
         const comments = await prisma.comment.findMany({
             where: {
                 postId: postId,
                 parentId: null
             },
-            orderBy: { createAt: 'desc' },
+            orderBy: { createdAt: 'desc' },
             include: {
                 //thong tin binh luan cha
                 user: { select: { id: true, displayName: true, avatar: true } },
                 //keo binh luan con
                 replies: {
-                    orderBy: { createdAt: 'asc' }, // Bình luận con thì xếp từ cũ đến mới để dễ đọc ngữ cảnh
+                    orderBy: { createddAt: 'asc' }, // Bình luận con thì xếp từ cũ đến mới để dễ đọc ngữ cảnh
                     include: {
                         //thong tin nguoi binh luan con
                         user: { select: { id: true, displayName: true, avatar: true } }
@@ -159,7 +189,6 @@ exports.getPostComments = async (req, res) => {
         });
         res.status(200).json(commnents);
     } catch (error) {
-        console.error("Lỗi lấy bình luận:", error);
-        res.status(500).json({ error: "Lỗi hệ thống khi tải bình luận" });
+        next(error);
     }
 }

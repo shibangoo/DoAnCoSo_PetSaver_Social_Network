@@ -13,21 +13,65 @@ model User {
   password    String
   displayName String?
   avatar      String?
-  dob         DateTime?                                       
+  dob         DateTime?
   role        String     @default("USER")
-  comments    Comment[]
-  pets        Pet[]
-  posts       Post[]
+
+  accountType String     @default("PERSONAL") 
+  petLimit    Int        @default(5)
+
+  posts       Post[]    
   reactions   Reaction[]
+  comments    Comment[]
+
+  pets        Pet[]      @relation("PetOwner")
+  coOwnedPets Pet[]      @relation("PetCoOwner")
+  adoptions   Pet[]      @relation("ShelterHistory")
+
+  tagBlocks   TagBlock[] @relation("Blocker")
+  blockedBy   TagBlock[] @relation("Blocked")
+}
+
+model TagBlock {
+  id        Int      @id @default(autoincrement())
+  blockerId Int      
+  blockedId Int      
+  createdAt DateTime @default(now())
+
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([blockerId, blockedId])
 }
 
 model Pet {
-  id      Int     @id @default(autoincrement())
-  name    String
-  avatar  String?
-  ownerId Int
-  owner   User    @relation(fields: [ownerId], references: [id], onUpdate: NoAction)
-  posts   Post[]  @relation("PetToPost")
+  id                   Int       @id @default(autoincrement())
+  
+  name                 String?
+  avatar               String?
+  species              String?
+  breed                String?
+  age                  Int?
+  healthStatus         String?
+
+  // BẮT BUỘC PHẢI CÓ CÁC CỘT LƯU ID NÀY
+  ownerId              Int
+  coOwnerId            Int?
+  shelterId            Int?
+
+  isAdopted            Boolean   @default(false) 
+  deletedAt            DateTime?
+  isPermanentlyDeleted Boolean   @default(false) 
+  requireTagApproval   Boolean   @default(true)
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // ĐÃ SỬA LỖI VÒNG LẶP CHO BẠN: Set NoAction cho 2 liên kết phụ
+  owner                User      @relation("PetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  coOwner              User?     @relation("PetCoOwner", fields: [coOwnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shelter              User?     @relation("ShelterHistory", fields: [shelterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  postTags             PostTag[] 
 }
 
 model Post {
@@ -36,10 +80,25 @@ model Post {
   image      String?
   authorId   Int
   createdAt  DateTime   @default(now())
-  comments   Comment[]
+  
   author     User       @relation(fields: [authorId], references: [id], onUpdate: NoAction)
+  comments   Comment[]
   reactions  Reaction[]
-  taggedPets Pet[]      @relation("PetToPost")
+  
+  tags       PostTag[]  
+}
+
+model PostTag {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  petId     Int
+  status    String   @default("PENDING") 
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, petId])
 }
 
 model Reaction {
