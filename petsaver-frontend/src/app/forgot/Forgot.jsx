@@ -18,7 +18,6 @@ export default function Forgot() {
 
     try {
       await resetPassword(form);
-
       alert("Đổi mật khẩu thành công!");
       navigate("/");
     } catch (err) {
@@ -27,26 +26,35 @@ export default function Forgot() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f6f8]">
 
-      <div className="bg-white p-8 rounded-xl shadow w-96">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
 
-        <h2 className="text-2xl font-bold text-center text-blue-500 mb-6">
-          Đổi mật khẩu
+        <h2 className="text-2xl font-bold text-center text-orange-500 mb-6">
+          🐾 Đổi mật khẩu
         </h2>
 
         <input
-          className="w-full p-3 border rounded mb-3"
+          className="w-full p-3 bg-gray-100 rounded-full mb-3"
           placeholder="Email"
+          onChange={(e) =>
+            setForm({ ...form, email: e.target.value })
+          }
         />
 
         <input
           type="password"
-          className="w-full p-3 border rounded mb-4"
+          className="w-full p-3 bg-gray-100 rounded-full mb-4"
           placeholder="Mật khẩu mới"
+          onChange={(e) =>
+            setForm({ ...form, newPassword: e.target.value })
+          }
         />
 
-        <button className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">
+        <button
+          onClick={handleReset}
+          className="w-full bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600"
+        >
           Đổi mật khẩu
         </button>
 

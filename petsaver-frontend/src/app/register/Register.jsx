@@ -24,13 +24,10 @@ export default function Register() {
 
     try {
       setLoading(true);
-
       await register(form);
-
       alert("Đăng ký thành công!");
       navigate("/");
     } catch (err) {
-      console.log(err);
       setError(err.response?.data?.message || "Lỗi đăng ký");
     } finally {
       setLoading(false);
@@ -38,24 +35,22 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      
-      <div className="bg-white p-8 rounded-xl shadow w-96">
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f6f8]">
 
-        <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">
-          Đăng ký PetSaver
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
+
+        <h2 className="text-2xl font-bold text-center text-orange-500 mb-6">
+          🐾 Đăng ký PetSaver
         </h2>
 
-        {/* ERROR */}
         {error && (
-          <div className="bg-red-100 text-red-600 p-2 mb-3 rounded text-sm">
+          <div className="bg-red-100 text-red-500 p-2 mb-3 rounded text-sm">
             {error}
           </div>
         )}
 
-        {/* DISPLAY NAME */}
         <input
-          className="w-full p-3 border rounded mb-3"
+          className="w-full p-3 bg-gray-100 rounded-full mb-3"
           placeholder="Tên hiển thị"
           value={form.displayName}
           onChange={(e) =>
@@ -63,9 +58,8 @@ export default function Register() {
           }
         />
 
-        {/* EMAIL */}
         <input
-          className="w-full p-3 border rounded mb-3"
+          className="w-full p-3 bg-gray-100 rounded-full mb-3"
           placeholder="Email"
           value={form.email}
           onChange={(e) =>
@@ -73,25 +67,21 @@ export default function Register() {
           }
         />
 
-        {/* PASSWORD */}
         <input
           type="password"
-          className="w-full p-3 border rounded mb-4"
+          className="w-full p-3 bg-gray-100 rounded-full mb-4"
           placeholder="Password"
           value={form.password}
           onChange={(e) =>
             setForm({ ...form, password: e.target.value })
           }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleRegister();
-          }}
+          onKeyDown={(e) => e.key === "Enter" && handleRegister()}
         />
 
-        {/* BUTTON */}
         <button
           onClick={handleRegister}
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600"
         >
           {loading ? "Đang đăng ký..." : "Đăng ký"}
         </button>

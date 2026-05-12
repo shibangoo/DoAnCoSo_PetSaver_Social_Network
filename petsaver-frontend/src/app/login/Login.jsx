@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext); // ✅ ĐẶT Ở ĐÂY
+  const { setUser } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     email: "",
@@ -18,7 +18,6 @@ export default function Login() {
   const handleLogin = async () => {
     setError("");
 
-    // validate
     if (!form.email || !form.password) {
       setError("Vui lòng nhập đầy đủ thông tin");
       return;
@@ -29,19 +28,15 @@ export default function Login() {
 
       const res = await login(form);
 
-      // 🔐 lưu token
       localStorage.setItem("token", res.data.token);
 
-      // 👤 lưu user (nếu backend trả)
       if (res.data.user) {
         localStorage.setItem("user", JSON.stringify(res.data.user));
         setUser(res.data.user);
       }
 
       navigate("/home");
-
     } catch (err) {
-      console.log(err);
       setError(err.response?.data?.message || "Lỗi server");
     } finally {
       setLoading(false);
@@ -49,60 +44,60 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow w-80">
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f6f8]">
 
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
-          PetSaver Login
-        </h2>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
+
+        {/* HEADER */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-orange-500">🐾 PetSaver</h1>
+          <p className="text-gray-400 text-sm">Welcome back!</p>
+        </div>
 
         {error && (
-          <div className="bg-red-100 text-red-600 p-2 mb-3 rounded text-sm">
+          <div className="bg-red-100 text-red-500 p-2 rounded mb-3 text-sm">
             {error}
           </div>
         )}
 
+        {/* INPUT */}
         <input
-          className="w-full p-3 border rounded mb-3 focus:outline-blue-500"
+          className="w-full p-3 bg-gray-100 rounded-full mb-3 outline-none"
           placeholder="Email"
           value={form.email}
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
-          className="w-full p-3 border rounded mb-4 focus:outline-blue-500"
+          className="w-full p-3 bg-gray-100 rounded-full mb-4 outline-none"
           placeholder="Password"
           value={form.password}
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleLogin();
-          }}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          onKeyDown={(e) => e.key === "Enter" && handleLogin()}
         />
 
+        {/* BUTTON */}
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 transition"
         >
           {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
 
+        {/* LINKS */}
         <div className="flex justify-between mt-4 text-sm">
           <span
             onClick={() => navigate("/forgot")}
-            className="text-blue-500 cursor-pointer hover:underline"
+            className="text-orange-500 cursor-pointer hover:underline"
           >
             Quên mật khẩu?
           </span>
 
           <span
             onClick={() => navigate("/register")}
-            className="text-blue-500 cursor-pointer hover:underline"
+            className="text-orange-500 cursor-pointer hover:underline"
           >
             Đăng ký
           </span>

@@ -1,127 +1,97 @@
-import { useState } from "react";
-import { HiOutlineCamera } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { getAvatar } from "../utils/avatar";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("posts");
 
-  const user = {
-    name: "Hoàng",
-    bio: "Yêu thú cưng 🐶",
-    avatar: "https://i.pravatar.cc/150",
-    cover: "https://picsum.photos/800/300",
-    followers: 120,
-    posts: 5,
-  };
+  // 🔥 FIX LỖI: luôn define user
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+
+  // fake posts (sau này connect API)
+  const posts = [
+    {
+      id: 1,
+      content: "Hôm nay boss rất ngoan 🐶",
+      image: "https://images.unsplash.com/photo-1558788353-f76d92427f16",
+    },
+    {
+      id: 2,
+      content: "Dắt boss đi dạo 🌿",
+      image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1",
+    },
+  ];
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-[#f5f6f8] min-h-screen">
 
-      {/* COVER */}
-      <div className="relative">
-        <img
-          src={user.cover}
-          className="w-full h-64 object-cover"
-        />
+      {/* ===== COVER ===== */}
+      <div className="h-56 bg-gradient-to-r from-orange-400 to-orange-500 relative">
 
-        {/* back button */}
+        {/* BACK BUTTON */}
         <button
           onClick={() => navigate("/home")}
-          className="absolute top-4 left-4 bg-white px-3 py-2 rounded-full shadow"
+          className="fixed top-4 left-4 z-50 bg-white px-4 py-2 rounded-full shadow hover:bg-gray-100 transition"
         >
-          ← Trang chủ
+          ← Home
         </button>
 
-        {/* avatar */}
-        <div className="absolute -bottom-16 left-10">
-          <div className="relative">
-            <img
-              src={user.avatar}
-              className="w-36 h-36 rounded-full border-4 border-white object-cover"
-            />
-
-            <button className="absolute bottom-2 right-2 bg-gray-200 p-2 rounded-full">
-              <HiOutlineCamera />
-            </button>
-          </div>
+        {/* AVATAR */}
+        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+          <img
+            src={getAvatar(user?.avatar)}
+            className="w-28 h-28 rounded-full border-4 border-white object-cover bg-gray-200 shadow"
+          />
         </div>
       </div>
 
-      {/* INFO */}
-      <div className="mt-20 px-10 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">{user.name}</h1>
-          <p className="text-gray-500">{user.bio}</p>
+      {/* ===== INFO ===== */}
+      <div className="mt-16 text-center">
+        <h2 className="text-xl font-bold">
+          {user?.displayName || "User"}
+        </h2>
+        <p className="text-gray-500">
+          @{user?.username || "username"}
+        </p>
 
-          {/* stats */}
-          <div className="flex gap-4 mt-2 text-sm text-gray-600">
-            <span><b>{user.posts}</b> bài viết</span>
-            <span><b>{user.followers}</b> followers</span>
-          </div>
-        </div>
+        {/* BIO */}
+        <p className="mt-2 text-gray-600 text-sm">
+          🐾 Yêu thú cưng • Pet Lover • Cuộc sống cùng boss
+        </p>
+      </div>
 
-        {/* edit button */}
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-          Chỉnh sửa hồ sơ
+      {/* ===== ACTION ===== */}
+      <div className="flex justify-center gap-3 mt-4">
+        <button className="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600">
+          Edit Profile
+        </button>
+        <button className="bg-gray-200 px-4 py-2 rounded-full hover:bg-gray-300">
+          Share
         </button>
       </div>
 
-      {/* TABS */}
-      <div className="mt-6 border-t px-10 flex gap-6 text-gray-600">
-        <button
-          onClick={() => setTab("posts")}
-          className={`py-3 ${tab === "posts" && "border-b-2 border-blue-500 text-blue-500"}`}
-        >
-          Bài viết
-        </button>
+      {/* ===== POSTS ===== */}
+      <div className="max-w-2xl mx-auto mt-6 px-4">
 
-        <button
-          onClick={() => setTab("pets")}
-          className={`py-3 ${tab === "pets" && "border-b-2 border-blue-500 text-blue-500"}`}
-        >
-          Thú cưng
-        </button>
+        <h3 className="font-semibold mb-3">Bài viết</h3>
 
-        <button
-          onClick={() => setTab("about")}
-          className={`py-3 ${tab === "about" && "border-b-2 border-blue-500 text-blue-500"}`}
-        >
-          Giới thiệu
-        </button>
+        {posts.map((post) => (
+          <div
+            key={post.id}
+            className="bg-white p-4 rounded-2xl shadow-sm mb-4"
+          >
+            <p>{post.content}</p>
+
+            {post.image && (
+              <img
+                src={post.image}
+                className="rounded-xl mt-3 w-full"
+              />
+            )}
+          </div>
+        ))}
+
       </div>
 
-      {/* CONTENT */}
-      <div className="max-w-2xl mx-auto mt-6">
-
-        {tab === "posts" && (
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="font-semibold">{user.name}</h3>
-              <p className="text-gray-500 text-sm">Vừa xong</p>
-              <p className="mt-2">Đây là bài viết đầu tiên 🐶</p>
-            </div>
-          </div>
-        )}
-
-        {tab === "pets" && (
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white p-3 rounded-lg shadow text-center">
-              🐶 Mít
-            </div>
-            <div className="bg-white p-3 rounded-lg shadow text-center">
-              🐱 Shin
-            </div>
-          </div>
-        )}
-
-        {tab === "about" && (
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p>Người yêu động vật, thích cứu hộ thú cưng 🐾</p>
-          </div>
-        )}
-
-      </div>
     </div>
   );
 }

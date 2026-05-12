@@ -12,6 +12,16 @@
   }
 }
 
+
+
+.icon-box {
+  @apply w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-orange-100 transition;
+}
+
+.icon-btn {
+  @apply w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xl cursor-pointer hover:bg-orange-100 hover:text-orange-500 transition;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-in-out;
 }
@@ -22,4 +32,9 @@
 
 .btn-primary {
   @apply w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700;
+}
+
+.avatar-hover {
+  @apply cursor-pointer transition duration-200
+  hover:scale-105 hover:ring-2 hover:ring-orange-400 hover:shadow-md;
 }
