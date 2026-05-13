@@ -11,11 +11,24 @@ app.use(express.json());
 // Nhập các Lễ tân (Routes) đã tạo
 const authRoutes = require('./routes/auth.routes');
 const postRoutes = require('./routes/post.routes');
+const petRoutes = require('./routes/pet.routes');
+const coOwnershipRoutes = require('./routes/co-ownership.routes');
+const taggingRoutes = require('./routes/tagging.routes');
+const aiRoutes = require('./routes/ai.routes');
+const friendshipRoutes = require('./routes/friendship.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const { apiLimiter } = require('./middlewares/rateLimiter');
 
 // Đăng ký luồng đi: 
-// Ví dụ ai vào đường dẫn '/api/auth/register' thì sẽ được đẩy qua authRoutes xử lý
+app.use('/api', apiLimiter); // Apply general rate limiter to all API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/pets', petRoutes);
+app.use('/api/co-ownership', coOwnershipRoutes);
+app.use('/api/tagging', taggingRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/friends', friendshipRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Định nghĩa cổng để chạy server
 const PORT = process.env.PORT || 3000;

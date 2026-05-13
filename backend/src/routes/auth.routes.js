@@ -12,4 +12,7 @@ router.put('/reset-password', authController.resetPassword);
 //duong dan xem dc cua admin
 router.get('/all-users', verifyToken, isAdmin, authController.getAllUsers);
 
+// update profile
+router.put('/update-profile', verifyToken, authController.updateProfile);
+
 module.exports = router;

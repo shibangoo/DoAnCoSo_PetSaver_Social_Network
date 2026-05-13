@@ -4,48 +4,58 @@ const AppError = require('../utils/AppError');
 
 exports.createPost = async (req, res) => {
     try {
-        //lay thong tin user va thong tin user dang len
         const authorId = req.user.userId;
-        const { content, image, petIds } = req.body;
+        const { content, image, petIds, isLostPet, lastSeenLocation, coordinates, lostDate, reward } = req.body;
 
-        //luu bai viet vao db
         const newPost = await prisma.post.create({
             data: {
-                content: content,
-                image: image,
-                authorId: authorId,
-                taggedPets: petIds
-                    ? { connect: petIds.map(id => ({ id })) }   //có thể có hoặc không có petId
+                content,
+                image,
+                authorId,
+                isLostPet: isLostPet || false,
+                lastSeenLocation,
+                coordinates,
+                lostDate: lostDate ? new Date(lostDate) : undefined,
+                reward,
+                tags: petIds
+                    ? { create: petIds.map(petId => ({ petId, status: 'PENDING' })) }
                     : undefined
             }
         });
-        res.status(200).json({ message: "Dang bai thanh cong", post: newPost });
+        res.status(201).json({ message: "Dang bai thanh cong", post: newPost });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: "Loi khi dang bai" });
     }
 }
 
 exports.getAllPosts = async (req, res) => {
     try {
-        //lay tat ca bai viet trong db
         const posts = await prisma.post.findMany({
-            //sap xep bai moi nhat len dau tien
             orderBy: {
                 createdAt: 'desc'
             },
-            //keo theo du lieu tu cac bang khac
             include: {
-                //lay thong tin tac gia
                 author: {
                     select: { id: true, displayName: true, avatar: true }
                 },
-                //lay ds thu cung duoc tagged
-                taggedPets: {
-                    select: { id: true, name: true, avatar: true }
+                tags: {
+                    include: {
+                        pet: {
+                            select: { id: true, name: true, avatar: true }
+                        }
+                    }
                 }
             }
         });
-        res.status(200).json(posts);
+
+        // Map the result to match the expected format on the frontend, if needed
+        const formattedPosts = posts.map(post => ({
+            ...post,
+            taggedPets: post.tags.map(t => t.pet)
+        }));
+
+        res.status(200).json(formattedPosts);
     } catch (error) {
         console.error("Loi tai bang tin:", error.message);
         console.error("Chi tiet:", error);
@@ -148,7 +158,7 @@ exports.addComment = async (req, res, next) => {
                 parentId: parentId ? parseInt(parentId) : null
             }
         });
-        return status(201).json({ message: "Binh luan thanh cong", comment: newComment });
+        return res.status(201).json({ message: "Binh luan thanh cong", comment: newComment });
     } catch (error) {
         next(error);
     }
@@ -179,7 +189,7 @@ exports.getPostComments = async (req, res, next) => {
                 user: { select: { id: true, displayName: true, avatar: true } },
                 //keo binh luan con
                 replies: {
-                    orderBy: { createddAt: 'asc' }, // Bình luận con thì xếp từ cũ đến mới để dễ đọc ngữ cảnh
+                    orderBy: { createdAt: 'asc' }, // Bình luận con thì xếp từ cũ đến mới để dễ đọc ngữ cảnh
                     include: {
                         //thong tin nguoi binh luan con
                         user: { select: { id: true, displayName: true, avatar: true } }
@@ -187,7 +197,7 @@ exports.getPostComments = async (req, res, next) => {
                 }
             }
         });
-        res.status(200).json(commnents);
+        res.status(200).json(comments);
     } catch (error) {
         next(error);
     }

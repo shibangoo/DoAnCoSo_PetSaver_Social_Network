@@ -95,3 +95,25 @@ exports.getAllUsers = async (req, res, next) => {
     next(error);
   }
 }
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { avatar, coverImage, displayName, dob } = req.body;
+    const userId = req.user.userId; // Requires auth middleware
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(avatar !== undefined && { avatar }),
+        ...(coverImage !== undefined && { coverImage }),
+        ...(displayName !== undefined && { displayName }),
+        ...(dob !== undefined && { dob: new Date(dob) })
+      },
+      select: { id: true, email: true, displayName: true, avatar: true, coverImage: true, dob: true }
+    });
+
+    res.status(200).json({ message: "Cập nhật hồ sơ thành công", user: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+};

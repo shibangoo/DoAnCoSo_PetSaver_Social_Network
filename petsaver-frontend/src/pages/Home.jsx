@@ -25,19 +25,19 @@ export default function Home() {
   };
 
   useEffect(() => {
-  fetchPosts();
-
-  const reload = () => {
     fetchPosts();
-    window.scrollTo({ top: 0, behavior: "smooth" }); // optional xịn hơn
-  };
 
-  window.addEventListener("reloadFeed", reload);
+    const reload = () => {
+      fetchPosts();
+      window.scrollTo({ top: 0, behavior: "smooth" }); // optional xịn hơn
+    };
 
-  return () => {
-    window.removeEventListener("reloadFeed", reload);
-  };
-}, []);
+    window.addEventListener("reloadFeed", reload);
+
+    return () => {
+      window.removeEventListener("reloadFeed", reload);
+    };
+  }, []);
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen flex">
@@ -52,9 +52,9 @@ export default function Home() {
         <Navbar />
 
         {/* 🔥 CLICK → OPEN MODAL */}
-        <CreatePost 
-          onPostCreated={fetchPosts} 
-          onOpen={() => setOpenModal(true)} 
+        <CreatePost
+          onPostCreated={fetchPosts}
+          onOpen={() => setOpenModal(true)}
         />
 
         {loading && <p className="text-center">Loading...</p>}

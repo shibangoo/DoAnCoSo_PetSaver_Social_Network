@@ -13,6 +13,7 @@ model User {
   password    String
   displayName String?
   avatar      String?
+  coverImage  String?
   dob         DateTime?
   role        String     @default("USER")
 
@@ -29,6 +30,16 @@ model User {
 
   tagBlocks   TagBlock[] @relation("Blocker")
   blockedBy   TagBlock[] @relation("Blocked")
+
+  friendships1 Friendship[] @relation("User1")
+  friendships2 Friendship[] @relation("User2")
+
+  notifications Notification[]
+
+  invitesSent     CoOwnerInvitation[] @relation("Inviter")
+  invitesReceived CoOwnerInvitation[] @relation("Invitee")
+
+  deletionRequests PetDeletionRequest[]
 }
 
 model TagBlock {
@@ -53,7 +64,6 @@ model Pet {
   age                  Int?
   healthStatus         String?
 
-  // BẮT BUỘC PHẢI CÓ CÁC CỘT LƯU ID NÀY
   ownerId              Int
   coOwnerId            Int?
   shelterId            Int?
@@ -66,26 +76,34 @@ model Pet {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
-  // ĐÃ SỬA LỖI VÒNG LẶP CHO BẠN: Set NoAction cho 2 liên kết phụ
   owner                User      @relation("PetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   coOwner              User?     @relation("PetCoOwner", fields: [coOwnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   shelter              User?     @relation("ShelterHistory", fields: [shelterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   postTags             PostTag[] 
+  coOwnerInvites       CoOwnerInvitation[]
+  deletionRequests     PetDeletionRequest[]
 }
 
 model Post {
-  id         Int        @id @default(autoincrement())
-  content    String?
-  image      String?
-  authorId   Int
-  createdAt  DateTime   @default(now())
+  id               Int        @id @default(autoincrement())
+  content          String?
+  image            String?
+  authorId         Int
+  createdAt        DateTime   @default(now())
   
-  author     User       @relation(fields: [authorId], references: [id], onUpdate: NoAction)
-  comments   Comment[]
-  reactions  Reaction[]
+  // Lost Pet fields
+  isLostPet        Boolean    @default(false)
+  lastSeenLocation String?
+  coordinates      String?
+  lostDate         DateTime?
+  reward           String?
+
+  author           User       @relation(fields: [authorId], references: [id], onUpdate: NoAction)
+  comments         Comment[]
+  reactions        Reaction[]
   
-  tags       PostTag[]  
+  tags             PostTag[]  
 }
 
 model PostTag {
@@ -124,4 +142,54 @@ model Comment {
   replies   Comment[] @relation("NestedComments")
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+}
+
+model CoOwnerInvitation {
+  id        Int      @id @default(autoincrement())
+  petId     Int
+  inviterId Int
+  inviteeId Int
+  status    String   @default("PENDING") 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  inviter   User     @relation("Inviter", fields: [inviterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invitee   User     @relation("Invitee", fields: [inviteeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model PetDeletionRequest {
+  id          Int      @id @default(autoincrement())
+  petId       Int
+  coOwnerId   Int
+  status      String   @default("PENDING") 
+  requestedAt DateTime @default(now())
+
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  coOwner     User     @relation(fields: [coOwnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  user1Id   Int
+  user2Id   Int
+  status    String   @default("PENDING") 
+  createdAt DateTime @default(now())
+
+  user1     User     @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2     User     @relation("User2", fields: [user2Id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user1Id, user2Id])
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  type        String   
+  message     String
+  isRead      Boolean  @default(false)
+  referenceId Int?     
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
