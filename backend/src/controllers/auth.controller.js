@@ -117,3 +117,54 @@ exports.updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getMe = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatar: true,
+        coverImage: true,
+        dob: true,
+        role: true,
+        accountType: true,
+        pets: {
+          where: { isPermanentlyDeleted: false },
+          orderBy: { createdAt: 'desc' }
+        },
+        posts: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            author: {
+              select: { id: true, displayName: true, avatar: true }
+            },
+            tags: {
+              include: {
+                pet: {
+                  select: { id: true, name: true, avatar: true }
+                }
+              }
+            },
+            reactions: true,
+            _count: {
+              select: { comments: true }
+            }
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return next(new AppError('Tài khoản không tồn tại', 404, 'USER_NOT_FOUND'));
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};

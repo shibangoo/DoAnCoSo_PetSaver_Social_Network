@@ -12,8 +12,8 @@ model User {
   email       String     @unique
   password    String
   displayName String?
-  avatar      String?
-  coverImage  String?
+  avatar      String? @db.NVarChar(Max)
+  coverImage  String? @db.NVarChar(Max)
   dob         DateTime?
   role        String     @default("USER")
 
@@ -58,7 +58,7 @@ model Pet {
   id                   Int       @id @default(autoincrement())
   
   name                 String?
-  avatar               String?
+  avatar               String? @db.NVarChar(Max)
   species              String?
   breed                String?
   age                  Int?
@@ -87,8 +87,8 @@ model Pet {
 
 model Post {
   id               Int        @id @default(autoincrement())
-  content          String?
-  image            String?
+  content          String? @db.NVarChar(Max)
+  image            String? @db.NVarChar(Max)
   authorId         Int
   createdAt        DateTime   @default(now())
   

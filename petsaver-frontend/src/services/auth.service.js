@@ -12,3 +12,6 @@ export const register = (data) =>
 export const resetPassword = (data) =>
   API.put("/auth/reset-password", data);
 
+// get current user profile
+export const getMe = () =>
+  API.get("/auth/me");

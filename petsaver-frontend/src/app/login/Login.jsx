@@ -2,6 +2,7 @@ import { login } from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,13 +14,10 @@ export default function Login() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    setError("");
-
     if (!form.email || !form.password) {
-      setError("Vui lòng nhập đầy đủ thông tin");
+      toast.error("Vui lòng nhập đầy đủ thông tin", { position: "top-center" });
       return;
     }
 
@@ -35,69 +33,69 @@ export default function Login() {
         setUser(res.data.user);
       }
 
+      toast.success("Đăng nhập thành công!", { position: "top-center" });
       navigate("/home");
     } catch (err) {
-      setError(err.response?.data?.message || "Lỗi server");
+      toast.error(err.response?.data?.message || "Lỗi đăng nhập", { position: "top-center" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f5f6f8]">
-
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f6f8] px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 animate-fade-in">
 
         {/* HEADER */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-orange-500">🐾 PetSaver</h1>
-          <p className="text-gray-400 text-sm">Welcome back!</p>
+          <h1 className="text-3xl font-bold text-orange-500 mb-2">🐾 PetSaver</h1>
+          <p className="text-gray-500 text-sm">Welcome back!</p>
         </div>
 
-        {error && (
-          <div className="bg-red-100 text-red-500 p-2 rounded mb-3 text-sm">
-            {error}
-          </div>
-        )}
-
         {/* INPUT */}
-        <input
-          className="w-full p-3 bg-gray-100 rounded-full mb-3 outline-none"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
+        <div className="space-y-4 mb-6">
+          <input
+            className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-orange-300 transition-all duration-300 border border-transparent focus:bg-white"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
 
-        <input
-          type="password"
-          className="w-full p-3 bg-gray-100 rounded-full mb-4 outline-none"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-        />
+          <input
+            type="password"
+            className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-orange-300 transition-all duration-300 border border-transparent focus:bg-white"
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+          />
+        </div>
 
         {/* BUTTON */}
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 transition"
+          className={`w-full bg-orange-500 text-white p-4 rounded-xl font-medium shadow-sm transition-all duration-300 ${
+            loading 
+              ? "opacity-70 cursor-not-allowed" 
+              : "hover:bg-orange-600 hover:shadow-lg hover:-translate-y-1 active:scale-95"
+          }`}
         >
           {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
 
         {/* LINKS */}
-        <div className="flex justify-between mt-4 text-sm">
+        <div className="flex justify-between mt-6 text-sm">
           <span
             onClick={() => navigate("/forgot")}
-            className="text-orange-500 cursor-pointer hover:underline"
+            className="text-orange-500 cursor-pointer font-medium hover:underline transition-all"
           >
             Quên mật khẩu?
           </span>
 
           <span
             onClick={() => navigate("/register")}
-            className="text-orange-500 cursor-pointer hover:underline"
+            className="text-orange-500 cursor-pointer font-medium hover:underline transition-all"
           >
             Đăng ký
           </span>

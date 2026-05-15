@@ -15,4 +15,7 @@ router.get('/all-users', verifyToken, isAdmin, authController.getAllUsers);
 // update profile
 router.put('/update-profile', verifyToken, authController.updateProfile);
 
+// Get my profile including pets and posts
+router.get('/me', verifyToken, authController.getMe);
+
 module.exports = router;

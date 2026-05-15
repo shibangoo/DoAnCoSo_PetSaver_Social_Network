@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const AppError = require('../utils/AppError');
 
-exports.createPost = async (req, res) => {
+exports.createPost = async (req, res, next) => {
     try {
         const authorId = req.user.userId;
         const { content, image, petIds, isLostPet, lastSeenLocation, coordinates, lostDate, reward } = req.body;
@@ -24,8 +24,7 @@ exports.createPost = async (req, res) => {
         });
         res.status(201).json({ message: "Dang bai thanh cong", post: newPost });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Loi khi dang bai" });
+        next(error);
     }
 }
 
@@ -45,6 +44,10 @@ exports.getAllPosts = async (req, res) => {
                             select: { id: true, name: true, avatar: true }
                         }
                     }
+                },
+                reactions: true,
+                _count: {
+                    select: { comments: true }
                 }
             }
         });
@@ -72,7 +75,8 @@ exports.toggleReaction = async (req, res) => {
         const { type } = req.body; //loai cam xuc tha
 
         //kiem tra cam xuc co hop le hay khong
-        if (type !== "LIKE" && type !== "DISLIKE") {
+        const allowedReactions = ["LIKE", "LOVE", "BONE", "FISH", "DISLIKE"];
+        if (!allowedReactions.includes(type)) {
             return res.status(400).json({ message: "Cam xuc khong hop le" });
         }
 

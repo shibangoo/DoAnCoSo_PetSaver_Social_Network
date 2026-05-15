@@ -29,7 +29,7 @@ export default function Home() {
 
     const reload = () => {
       fetchPosts();
-      window.scrollTo({ top: 0, behavior: "smooth" }); // optional xịn hơn
+      window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     window.addEventListener("reloadFeed", reload);
@@ -51,18 +51,40 @@ export default function Home() {
       <div className="flex-1 max-w-2xl mx-auto p-4">
         <Navbar />
 
-        {/* 🔥 CLICK → OPEN MODAL */}
+        {/* CLICK → OPEN MODAL */}
         <CreatePost
           onPostCreated={fetchPosts}
           onOpen={() => setOpenModal(true)}
         />
 
-        {loading && <p className="text-center">Loading...</p>}
+        {loading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-white p-4 rounded-2xl shadow-sm animate-pulse">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                    <div className="h-3 bg-gray-100 rounded w-1/6"></div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+                </div>
+                <div className="h-48 bg-gray-100 rounded-xl mt-4"></div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {!loading && posts.length === 0 && (
-          <p className="text-center text-gray-400">
-            Chưa có bài viết
-          </p>
+          <div className="bg-white rounded-2xl shadow-sm p-8 text-center flex flex-col items-center justify-center animate-fade-in mb-4">
+            <span className="text-6xl mb-4">😿</span>
+            <h3 className="text-lg font-bold text-gray-700 mb-1">Meow! Bảng tin trống trơn</h3>
+            <p className="text-gray-500 text-sm">Hãy là người đầu tiên đăng bài viết nhé!</p>
+          </div>
         )}
 
         {posts.map((post) => (
@@ -78,7 +100,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🔥 MODAL */}
+      {/* MODAL */}
       <CreatePostModal
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
