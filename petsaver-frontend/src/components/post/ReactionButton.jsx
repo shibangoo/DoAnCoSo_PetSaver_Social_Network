@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaPaw, FaHeart, FaBone, FaFish } from "react-icons/fa";
 
 const reactions = [
@@ -11,11 +11,22 @@ const reactions = [
 export default function ReactionButton({ initialReaction, onReact }) {
   const [show, setShow] = useState(false);
   const [selected, setSelected] = useState(initialReaction || null);
+  const timerRef = useRef(null);
 
   const current = reactions.find(r => r.type === selected);
 
+  const handleMouseEnter = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setShow(true);
+  };
+
+  const handleMouseLeave = () => {
+    timerRef.current = setTimeout(() => {
+      setShow(false);
+    }, 400); // Đợi 400ms trước khi ẩn đi
+  };
+
   const handleReact = (type) => {
-    // Optimistic UI update
     const newReaction = selected === type ? null : type;
     setSelected(newReaction);
     setShow(false);
@@ -26,17 +37,17 @@ export default function ReactionButton({ initialReaction, onReact }) {
 
   const handleToggleDefault = () => {
     if (selected) {
-      handleReact(selected); // Gỡ bỏ cảm xúc hiện tại
+      handleReact(selected); 
     } else {
-      handleReact("LIKE"); // Mặc định thả Chân chó
+      handleReact("LIKE"); 
     }
   };
 
   return (
     <div
       className="relative flex-1"
-      onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* BUTTON */}
       <button 

@@ -28,19 +28,19 @@ export default function Navbar() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm px-5 py-3 flex items-center gap-4 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm px-5 py-3 flex items-center gap-4 mb-4 transition-colors">
 
       {/* SEARCH */}
-      <div className="flex-1 flex items-center bg-gray-50 px-4 py-2 rounded-xl border border-gray-100 focus-within:ring-2 focus-within:ring-orange-200 transition-all">
+      <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-700 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-600 focus-within:ring-2 focus-within:ring-orange-200 transition-all">
         <input
           placeholder="Search pets, people, tags..."
-          className="bg-transparent outline-none w-full text-sm"
+          className="bg-transparent outline-none w-full text-sm dark:text-white"
         />
       </div>
 
       {/* USER & AVATAR */}
       <div className="relative flex items-center gap-3" ref={dropdownRef}>
-        <span className="text-sm font-medium text-gray-700 hidden md:block">
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">
           {user?.displayName || "User"}
         </span>
         
@@ -55,23 +55,23 @@ export default function Navbar() {
 
         {/* DROPDOWN */}
         {isDropdownOpen && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 z-50 animate-fade-in origin-top-right">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg py-2 border border-gray-100 dark:border-gray-700 z-50 animate-fade-in origin-top-right">
             <div 
               onClick={() => { setIsDropdownOpen(false); navigate("/profile"); }}
-              className="px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 cursor-pointer transition-colors"
+              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 cursor-pointer transition-colors"
             >
               Hồ sơ của tôi
             </div>
             <div 
               onClick={() => { setIsDropdownOpen(false); navigate("/settings"); }}
-              className="px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 cursor-pointer transition-colors"
+              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 cursor-pointer transition-colors"
             >
               Cài đặt
             </div>
-            <div className="border-t border-gray-100 my-1"></div>
+            <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
             <div 
               onClick={handleLogout}
-              className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors font-medium"
+              className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 cursor-pointer transition-colors font-medium"
             >
               Đăng xuất
             </div>

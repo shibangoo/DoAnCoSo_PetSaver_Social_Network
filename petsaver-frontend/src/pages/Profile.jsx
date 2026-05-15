@@ -5,17 +5,31 @@ import { getMe } from "../services/auth.service";
 import PostCard from "../components/post/PostCard";
 import PetCard from "../components/pet/PetCard";
 import AddPetModal from "../components/pet/AddPetModal";
+import EditProfileModal from "../components/profile/EditProfileModal";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openAddPet, setOpenAddPet] = useState(false);
+  const [openEditProfile, setOpenEditProfile] = useState(false);
 
   const fetchProfile = async () => {
     try {
       const res = await getMe();
       setProfile(res.data);
+      
+      // Đồng bộ hóa lại localStorage phòng trường hợp lỗi cũ
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (currentUser.id !== res.data.id) {
+        localStorage.setItem("user", JSON.stringify({
+          id: res.data.id,
+          email: res.data.email,
+          displayName: res.data.displayName,
+          avatar: res.data.avatar,
+          role: res.data.role
+        }));
+      }
     } catch (err) {
       console.error("Lỗi lấy thông tin profile:", err);
     } finally {
@@ -36,7 +50,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="bg-[#f5f6f8] min-h-screen pb-10">
+    <div className="bg-[#f5f6f8] dark:bg-gray-900 min-h-screen pb-10 transition-colors">
 
       {/* ===== COVER ===== */}
       <div className="h-56 bg-gradient-to-r from-orange-400 to-orange-500 relative">
@@ -58,22 +72,25 @@ export default function Profile() {
 
       {/* ===== INFO ===== */}
       <div className="mt-20 text-center px-4">
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
           {profile.displayName || "Người dùng ẩn danh"}
         </h2>
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           {profile.email}
         </p>
 
         {/* BIO */}
-        <p className="mt-3 text-gray-600 text-sm max-w-md mx-auto bg-orange-50 py-2 px-4 rounded-full border border-orange-100">
-          🐾 {profile.accountType === 'SHELTER' ? 'Tổ chức cứu hộ' : 'Yêu thú cưng • Pet Lover'}
+        <p className="mt-3 text-gray-600 dark:text-gray-300 text-sm max-w-md mx-auto bg-orange-50 dark:bg-orange-900/20 py-2 px-4 rounded-3xl border border-orange-100 dark:border-orange-900/30 break-words whitespace-pre-wrap">
+          🐾 {profile.bio || (profile.accountType === 'SHELTER' ? 'Tổ chức cứu hộ' : 'Yêu thú cưng • Pet Lover')}
         </p>
       </div>
 
       {/* ===== ACTION ===== */}
       <div className="flex justify-center gap-3 mt-6">
-        <button className="bg-orange-500 text-white px-6 py-2 rounded-xl font-medium hover:bg-orange-600 hover:shadow-md transition-all active:scale-95">
+        <button 
+          onClick={() => setOpenEditProfile(true)}
+          className="bg-orange-500 text-white px-6 py-2 rounded-xl font-medium hover:bg-orange-600 hover:shadow-md transition-all active:scale-95"
+        >
           Chỉnh sửa hồ sơ
         </button>
       </div>
@@ -82,9 +99,9 @@ export default function Profile() {
         
         {/* LEFT COLUMN: PETS */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 sticky top-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5 border border-gray-100 dark:border-gray-700 sticky top-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg text-gray-800">Thú cưng ({profile.pets?.length || 0})</h3>
+              <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">Thú cưng ({profile.pets?.length || 0})</h3>
               <button 
                 onClick={() => setOpenAddPet(true)}
                 className="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-100 transition-colors cursor-pointer"
@@ -102,9 +119,9 @@ export default function Profile() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div className="text-center py-6 bg-gray-50 dark:bg-gray-700 rounded-xl border border-dashed border-gray-200 dark:border-gray-600">
                   <span className="text-3xl opacity-50 mb-2 block">😿</span>
-                  <p className="text-sm text-gray-500">Chưa có bé nào</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Chưa có bé nào</p>
                 </div>
               )}
             </div>
@@ -113,16 +130,16 @@ export default function Profile() {
 
         {/* RIGHT COLUMN: POSTS */}
         <div className="lg:col-span-2">
-          <h3 className="font-bold text-lg mb-4 text-gray-800 px-2">Bài viết của {profile.displayName}</h3>
+          <h3 className="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200 px-2">Bài viết của {profile.displayName}</h3>
 
           {profile.posts && profile.posts.length > 0 ? (
             profile.posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard key={post.id} post={post} onPostUpdated={fetchProfile} />
             ))
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm p-10 text-center border border-gray-100 animate-fade-in">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-10 text-center border border-gray-100 dark:border-gray-700 animate-fade-in">
               <span className="text-5xl opacity-50 block mb-4">📝</span>
-              <p className="text-gray-500 font-medium">Chưa có bài viết nào.</p>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">Chưa có bài viết nào.</p>
             </div>
           )}
         </div>
@@ -133,6 +150,13 @@ export default function Profile() {
         isOpen={openAddPet} 
         onClose={() => setOpenAddPet(false)} 
         onPetAdded={fetchProfile}
+      />
+
+      <EditProfileModal 
+        isOpen={openEditProfile}
+        onClose={() => setOpenEditProfile(false)}
+        currentProfile={profile}
+        onProfileUpdated={fetchProfile}
       />
     </div>
   );

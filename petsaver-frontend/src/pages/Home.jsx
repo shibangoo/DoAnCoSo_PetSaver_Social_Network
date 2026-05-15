@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import SidebarLeft from "../components/layout/SidebarLeft";
 import CreatePost from "../components/post/CreatePost";
@@ -24,6 +25,21 @@ export default function Home() {
     }
   };
 
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!loading && location.state?.scrollToPostId) {
+      setTimeout(() => {
+        const el = document.getElementById(`post-${location.state.scrollToPostId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-orange-300', 'transition-all', 'duration-1000');
+          setTimeout(() => el.classList.remove('ring-4', 'ring-orange-300'), 2000);
+        }
+      }, 500); // Give it a bit of time to render
+    }
+  }, [loading, location.state]);
+
   useEffect(() => {
     fetchPosts();
 
@@ -40,7 +56,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-[#f5f6f8] min-h-screen flex">
+    <div className="bg-[#f5f6f8] dark:bg-gray-900 min-h-screen flex transition-colors">
 
       {/* LEFT */}
       <div className="w-64 p-4 hidden lg:block">
@@ -60,7 +76,7 @@ export default function Home() {
         {loading && (
           <div className="space-y-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="bg-white p-4 rounded-2xl shadow-sm animate-pulse">
+              <div key={n} className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm animate-pulse">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                   <div className="flex-1">
@@ -80,21 +96,23 @@ export default function Home() {
         )}
 
         {!loading && posts.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-sm p-8 text-center flex flex-col items-center justify-center animate-fade-in mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 text-center flex flex-col items-center justify-center animate-fade-in mb-4">
             <span className="text-6xl mb-4">😿</span>
-            <h3 className="text-lg font-bold text-gray-700 mb-1">Meow! Bảng tin trống trơn</h3>
+            <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-1">Meow! Bảng tin trống trơn</h3>
             <p className="text-gray-500 text-sm">Hãy là người đầu tiên đăng bài viết nhé!</p>
           </div>
         )}
 
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <div id={`post-${post.id}`} key={post.id} className="rounded-2xl transition-all">
+            <PostCard post={post} onPostUpdated={fetchPosts} />
+          </div>
         ))}
       </div>
 
       {/* RIGHT */}
       <div className="w-80 p-4 hidden xl:block">
-        <div className="bg-white p-4 rounded-2xl shadow-sm">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm text-gray-800 dark:text-gray-200">
           <h3 className="font-semibold mb-3">Gợi ý</h3>
           <p>🐶 Pet Lover</p>
         </div>

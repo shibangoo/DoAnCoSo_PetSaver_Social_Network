@@ -18,4 +18,22 @@ router.put('/update-profile', verifyToken, authController.updateProfile);
 // Get my profile including pets and posts
 router.get('/me', verifyToken, authController.getMe);
 
+// Get suggestions
+router.get('/suggestions', verifyToken, authController.getSuggestions);
+
+// Get other user profile
+router.get('/profile/:id', verifyToken, authController.getUserProfile);
+
+// Change Password
+router.put('/change-password', verifyToken, authController.changePassword);
+
+// Block/Unblock
+router.get('/blocked-users', verifyToken, authController.getBlockedUsers);
+router.post('/block/:id', verifyToken, authController.blockUser);
+router.post('/unblock/:id', verifyToken, authController.unblockUser);
+
+// Deactivate/Delete
+router.post('/deactivate', verifyToken, authController.deactivateAccount);
+router.post('/delete-account', verifyToken, authController.deleteAccount);
+
 module.exports = router;

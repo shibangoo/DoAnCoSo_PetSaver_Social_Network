@@ -14,3 +14,11 @@ export const reactPost = (postId, type) =>
 // comment
 export const commentPost = (postId, content) =>
   API.post(`/posts/${postId}/comments`, { content });
+
+// update post
+export const updatePost = (postId, data) =>
+  API.put(`/posts/${postId}`, data);
+
+// delete post
+export const deletePost = (postId) =>
+  API.delete(`/posts/${postId}`);

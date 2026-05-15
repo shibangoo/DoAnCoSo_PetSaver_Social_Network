@@ -157,7 +157,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={isLostPet ? "Hãy mô tả đặc điểm nhận dạng của bé (Màu lông, vòng cổ, vết bớt...)" : "Meow! Bạn đang nghĩ gì thế?"}
+            placeholder={isLostPet ? "Hãy mô tả đặc điểm nhận dạng của bé (Màu lông, vòng cổ, vết bớt...)" : `${user?.displayName || "Bạn"} ơi, bạn đang nghĩ gì thế?`}
             className={`w-full min-h-[100px] resize-none outline-none bg-transparent text-lg text-gray-800 dark:text-white placeholder-gray-400 ${isLostPet ? 'text-red-900 placeholder-red-300' : ''}`}
           />
 

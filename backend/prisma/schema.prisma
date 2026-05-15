@@ -15,14 +15,17 @@ model User {
   avatar      String? @db.NVarChar(Max)
   coverImage  String? @db.NVarChar(Max)
   dob         DateTime?
+  bio         String? @db.NVarChar(Max)
   role        String     @default("USER")
 
   accountType String     @default("PERSONAL") 
   petLimit    Int        @default(5)
+  isDeactivated Boolean  @default(false)
 
   posts       Post[]    
   reactions   Reaction[]
   comments    Comment[]
+  commentReactions CommentReaction[]
 
   pets        Pet[]      @relation("PetOwner")
   coOwnedPets Pet[]      @relation("PetCoOwner")
@@ -99,6 +102,10 @@ model Post {
   lostDate         DateTime?
   reward           String?
 
+  sharedPostId     Int?
+  sharedPost       Post?      @relation("SharedPost", fields: [sharedPostId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shares           Post[]     @relation("SharedPost")
+
   author           User       @relation(fields: [authorId], references: [id], onUpdate: NoAction)
   comments         Comment[]
   reactions        Reaction[]
@@ -142,6 +149,20 @@ model Comment {
   replies   Comment[] @relation("NestedComments")
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  reactions CommentReaction[]
+}
+
+model CommentReaction {
+  id        Int      @id @default(autoincrement())
+  type      String   @default("LIKE")
+  userId    Int
+  commentId Int
+  createdAt DateTime @default(now())
+  
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, commentId])
 }
 
 model CoOwnerInvitation {

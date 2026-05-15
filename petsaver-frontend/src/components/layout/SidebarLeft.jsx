@@ -8,6 +8,9 @@ import {
 } from "../icons/Symbols";
 
 import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import API from "../../services/api";
+import CreatePostModal from "../post/CreatePostModal";
 
 /* ================= ITEM ================= */
 function Item({ icon, text, active, badge, onClick }) {
@@ -16,12 +19,12 @@ function Item({ icon, text, active, badge, onClick }) {
       onClick={onClick}
       className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all duration-200
       ${active 
-        ? "bg-orange-50 text-orange-500 scale-[1.02]" 
-        : "text-gray-600 hover:bg-gray-100 hover:scale-[1.02]"}`}
+        ? "bg-orange-50 dark:bg-orange-900/20 text-orange-500 scale-[1.02]" 
+        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-[1.02]"}`}
     >
       <div className="flex items-center gap-3">
 
-        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-orange-100 transition">
+        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition">
           {icon}
         </div>
 
@@ -41,11 +44,31 @@ function Item({ icon, text, active, badge, onClick }) {
 export default function SidebarLeft() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const path = location.pathname;
 
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await API.get('/notifications/unread-count');
+        setUnreadCount(res.data.count);
+      } catch (err) {
+        console.error("Lỗi đếm thông báo:", err);
+      }
+    };
+    
+    fetchUnreadCount();
+    
+    // Tạo 1 listener để update count khi có sự kiện (ví dụ realtime comment)
+    const interval = setInterval(fetchUnreadCount, 5000); // Polling mỗi 5s cho real-time
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-4 h-full">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 h-full transition-colors">
 
       {/* LOGO */}
       <h1
@@ -88,7 +111,7 @@ export default function SidebarLeft() {
         <Item
           icon={<BellSymbol />}
           text="Notifications"
-          badge="3"
+          badge={unreadCount > 0 ? unreadCount : null}
           active={path === "/notifications"}
           onClick={() => navigate("/notifications")}
         />
@@ -110,9 +133,19 @@ export default function SidebarLeft() {
       </div>
 
       {/* BUTTON */}
-      <button className="mt-6 w-full bg-orange-500 text-white py-2 rounded-xl hover:bg-orange-600 transition">
+      <button 
+        onClick={() => setShowCreateModal(true)}
+        className="mt-6 w-full bg-orange-500 text-white py-2 rounded-xl hover:bg-orange-600 transition"
+      >
         + Create Post
       </button>
+
+      {/* CREATE POST MODAL */}
+      <CreatePostModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+        user={user} 
+      />
     </div>
   );
 }

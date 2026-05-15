@@ -15,3 +15,14 @@ export const resetPassword = (data) =>
 // get current user profile
 export const getMe = () =>
   API.get("/auth/me");
+
+// update profile
+export const updateProfile = (data) =>
+  API.put("/auth/update-profile", data);
+
+export const getSuggestions = () =>
+  API.get("/auth/suggestions");
+
+export const getUserProfile = (id) =>
+  API.get(`/auth/profile/${id}`);
+

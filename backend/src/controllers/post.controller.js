@@ -5,7 +5,7 @@ const AppError = require('../utils/AppError');
 exports.createPost = async (req, res, next) => {
     try {
         const authorId = req.user.userId;
-        const { content, image, petIds, isLostPet, lastSeenLocation, coordinates, lostDate, reward } = req.body;
+        const { content, image, petIds, isLostPet, lastSeenLocation, coordinates, lostDate, reward, sharedPostId } = req.body;
 
         const newPost = await prisma.post.create({
             data: {
@@ -17,6 +17,7 @@ exports.createPost = async (req, res, next) => {
                 coordinates,
                 lostDate: lostDate ? new Date(lostDate) : undefined,
                 reward,
+                sharedPostId: sharedPostId ? parseInt(sharedPostId) : undefined,
                 tags: petIds
                     ? { create: petIds.map(petId => ({ petId, status: 'PENDING' })) }
                     : undefined
@@ -28,9 +29,80 @@ exports.createPost = async (req, res, next) => {
     }
 }
 
+exports.updatePost = async (req, res, next) => {
+    try {
+        const postId = parseInt(req.params.postId);
+        const authorId = req.user.userId;
+        const { content, image, isLostPet, lastSeenLocation, coordinates, lostDate, reward } = req.body;
+
+        const post = await prisma.post.findUnique({ where: { id: postId } });
+        if (!post) {
+            return next(new AppError('Bài viết không tồn tại', 404, 'POST_NOT_FOUND'));
+        }
+        if (post.authorId !== authorId) {
+            return next(new AppError('Bạn không có quyền chỉnh sửa bài viết này', 403, 'UNAUTHORIZED'));
+        }
+
+        const updatedPost = await prisma.post.update({
+            where: { id: postId },
+            data: {
+                content,
+                image,
+                isLostPet: isLostPet !== undefined ? isLostPet : post.isLostPet,
+                lastSeenLocation: lastSeenLocation !== undefined ? lastSeenLocation : post.lastSeenLocation,
+                coordinates: coordinates !== undefined ? coordinates : post.coordinates,
+                lostDate: lostDate ? new Date(lostDate) : post.lostDate,
+                reward: reward !== undefined ? reward : post.reward,
+            }
+        });
+        res.status(200).json({ message: "Cập nhật bài viết thành công", post: updatedPost });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.deletePost = async (req, res, next) => {
+    try {
+        const postId = parseInt(req.params.postId);
+        const authorId = req.user.userId;
+
+        const post = await prisma.post.findUnique({ where: { id: postId } });
+        if (!post) {
+            return next(new AppError('Bài viết không tồn tại', 404, 'POST_NOT_FOUND'));
+        }
+        if (post.authorId !== authorId) {
+            return next(new AppError('Bạn không có quyền xóa bài viết này', 403, 'UNAUTHORIZED'));
+        }
+
+        await prisma.post.delete({ where: { id: postId } });
+        res.status(200).json({ message: "Xóa bài viết thành công" });
+    } catch (error) {
+        next(error);
+    }
+}
+
 exports.getAllPosts = async (req, res) => {
     try {
+        const userId = req.user ? req.user.userId : null;
+        let blockedUserIds = [];
+
+        if (userId) {
+            const blocks = await prisma.tagBlock.findMany({
+                where: {
+                    OR: [
+                        { blockerId: userId },
+                        { blockedId: userId }
+                    ]
+                }
+            });
+            blockedUserIds = blocks.map(b => b.blockerId === userId ? b.blockedId : b.blockerId);
+        }
+
         const posts = await prisma.post.findMany({
+            where: {
+                author: { isDeactivated: false },
+                authorId: { notIn: blockedUserIds }
+            },
             orderBy: {
                 createdAt: 'desc'
             },
@@ -48,6 +120,11 @@ exports.getAllPosts = async (req, res) => {
                 reactions: true,
                 _count: {
                     select: { comments: true }
+                },
+                sharedPost: {
+                    include: {
+                        author: { select: { id: true, displayName: true, avatar: true } }
+                    }
                 }
             }
         });
@@ -113,6 +190,21 @@ exports.toggleReaction = async (req, res) => {
                     postId: postId
                 }
             });
+
+            // Create notification
+            const post = await prisma.post.findUnique({ where: { id: postId }, select: { authorId: true } });
+            if (post && post.authorId !== userId) {
+                const sender = await prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+                await prisma.notification.create({
+                    data: {
+                        userId: post.authorId,
+                        type: 'REACTION',
+                        message: `${sender?.displayName || 'Ai đó'} đã bày tỏ cảm xúc về bài viết của bạn.`,
+                        referenceId: postId
+                    }
+                });
+            }
+
             return res.status(200).json({ message: "Da tha cam xuc", reaction: newReaction });
         }
     } catch (error) {
@@ -162,6 +254,20 @@ exports.addComment = async (req, res, next) => {
                 parentId: parentId ? parseInt(parentId) : null
             }
         });
+
+        // Create notification
+        if (post.authorId !== userId) {
+            const sender = await prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+            await prisma.notification.create({
+                data: {
+                    userId: post.authorId,
+                    type: 'COMMENT',
+                    message: `${sender?.displayName || 'Ai đó'} đã bình luận: "${content.substring(0, 30)}${content.length > 30 ? '...' : ''}" trên bài viết của bạn.`,
+                    referenceId: postId
+                }
+            });
+        }
+
         return res.status(201).json({ message: "Binh luan thanh cong", comment: newComment });
     } catch (error) {
         next(error);
@@ -191,12 +297,14 @@ exports.getPostComments = async (req, res, next) => {
             include: {
                 //thong tin binh luan cha
                 user: { select: { id: true, displayName: true, avatar: true } },
+                reactions: true,
                 //keo binh luan con
                 replies: {
                     orderBy: { createdAt: 'asc' }, // Bình luận con thì xếp từ cũ đến mới để dễ đọc ngữ cảnh
                     include: {
                         //thong tin nguoi binh luan con
-                        user: { select: { id: true, displayName: true, avatar: true } }
+                        user: { select: { id: true, displayName: true, avatar: true } },
+                        reactions: true
                     }
                 }
             }
@@ -206,3 +314,75 @@ exports.getPostComments = async (req, res, next) => {
         next(error);
     }
 }
+
+exports.updateComment = async (req, res, next) => {
+    try {
+        const commentId = parseInt(req.params.commentId);
+        const userId = req.user.userId;
+        const { content } = req.body;
+
+        const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+        if (!comment) return res.status(404).json({ message: "Bình luận không tồn tại" });
+        if (comment.userId !== userId) return res.status(403).json({ message: "Không có quyền sửa" });
+
+        const updated = await prisma.comment.update({
+            where: { id: commentId },
+            data: { content }
+        });
+        res.status(200).json({ message: "Đã sửa bình luận", comment: updated });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteComment = async (req, res, next) => {
+    try {
+        const commentId = parseInt(req.params.commentId);
+        const userId = req.user.userId;
+
+        const comment = await prisma.comment.findUnique({ where: { id: commentId }, include: { post: true } });
+        if (!comment) return res.status(404).json({ message: "Bình luận không tồn tại" });
+        
+        // Owner of the comment OR owner of the post can delete
+        if (comment.userId !== userId && comment.post.authorId !== userId) {
+            return res.status(403).json({ message: "Không có quyền xóa" });
+        }
+
+        await prisma.comment.delete({ where: { id: commentId } });
+        res.status(200).json({ message: "Đã xóa bình luận" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.reactComment = async (req, res, next) => {
+    try {
+        const commentId = parseInt(req.params.commentId);
+        const userId = req.user.userId;
+        const { type } = req.body;
+
+        const existing = await prisma.commentReaction.findUnique({
+            where: { userId_commentId: { userId, commentId } }
+        });
+
+        if (existing) {
+            if (existing.type === type || !type) {
+                await prisma.commentReaction.delete({ where: { id: existing.id } });
+                return res.status(200).json({ message: "Đã gỡ cảm xúc" });
+            } else {
+                const updated = await prisma.commentReaction.update({
+                    where: { id: existing.id },
+                    data: { type }
+                });
+                return res.status(200).json({ message: "Đã đổi cảm xúc", reaction: updated });
+            }
+        } else {
+            const created = await prisma.commentReaction.create({
+                data: { type: type || 'LIKE', userId, commentId }
+            });
+            return res.status(200).json({ message: "Đã thả cảm xúc", reaction: created });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
