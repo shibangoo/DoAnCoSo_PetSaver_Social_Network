@@ -18,6 +18,7 @@ const taggingRoutes = require('./routes/tagging.routes');
 const aiRoutes = require('./routes/ai.routes');
 const friendshipRoutes = require('./routes/friendship.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const searchRoutes = require('./routes/search.routes');
 const { apiLimiter } = require('./middlewares/rateLimiter');
 
 // Đăng ký luồng đi: 
@@ -30,6 +31,7 @@ app.use('/api/tagging', taggingRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/friends', friendshipRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/search', searchRoutes);
 
 // Định nghĩa cổng để chạy server
 const PORT = process.env.PORT || 3000;

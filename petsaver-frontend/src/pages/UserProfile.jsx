@@ -27,6 +27,16 @@ export default function UserProfile() {
   const menuRef = useRef(null);
   const respondMenuRef = useRef(null);
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const handleNavigate = (friendId) => {
+    if (friendId === currentUser.id) {
+      navigate('/profile');
+    } else {
+      navigate(`/profile/${friendId}`);
+    }
+  };
+
   const fetchProfile = async () => {
     try {
       const res = await getUserProfile(id);
@@ -312,7 +322,7 @@ export default function UserProfile() {
                     src={getAvatar(friend.avatar)}
                     title={friend.displayName}
                     className="w-12 h-12 rounded-full object-cover bg-gray-200 dark:bg-gray-700 cursor-pointer border border-gray-100 dark:border-gray-600 hover:scale-105 transition-transform"
-                    onClick={() => navigate(`/profile/${friend.id}`)}
+                    onClick={() => handleNavigate(friend.id)}
                   />
                 ))
               ) : (

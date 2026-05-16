@@ -8,6 +8,7 @@ import UserProfile from "./pages/UserProfile";
 import Friends from "./pages/Friends";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
+import Explore from "./pages/Explore";
 import PetDetail from "./pages/PetDetail";
 import Login from "./app/login/Login";
 import Register from "./app/register/Register";
@@ -40,6 +41,7 @@ function App() {
           <Route path="/friends" element={<ProtectedRoute><Friends /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
           <Route path="/pet/:id" element={<ProtectedRoute><PetDetail /></ProtectedRoute>} />
         </Routes>
         

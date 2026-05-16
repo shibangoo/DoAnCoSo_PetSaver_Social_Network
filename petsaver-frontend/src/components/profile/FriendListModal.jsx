@@ -3,6 +3,16 @@ import { getAvatar } from "../../utils/avatar";
 export default function FriendListModal({ isOpen, onClose, friends, title = "Danh sách bạn bè" }) {
   if (!isOpen) return null;
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const handleNavigate = (friendId) => {
+    if (friendId === currentUser.id) {
+      window.location.href = '/profile';
+    } else {
+      window.location.href = `/profile/${friendId}`;
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* OVERLAY */}
@@ -35,12 +45,12 @@ export default function FriendListModal({ isOpen, onClose, friends, title = "Dan
                 <img
                   src={getAvatar(friend.avatar)}
                   className="w-12 h-12 rounded-full object-cover bg-gray-200 dark:bg-gray-600 cursor-pointer"
-                  onClick={() => window.location.href = `/profile/${friend.id}`}
+                  onClick={() => handleNavigate(friend.id)}
                 />
                 <div className="flex-1">
                   <p 
                     className="font-semibold text-gray-800 dark:text-white cursor-pointer hover:underline"
-                    onClick={() => window.location.href = `/profile/${friend.id}`}
+                    onClick={() => handleNavigate(friend.id)}
                   >
                     {friend.displayName || friend.name}
                   </p>
