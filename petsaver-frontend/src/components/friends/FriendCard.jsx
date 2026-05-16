@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { getAvatar } from "../../utils/avatar";
-import { unfriend, sendFriendRequest } from "../../services/friend.service";
+import { unfriend, sendFriendRequest, rejectRequest } from "../../services/friend.service";
 import toast from "react-hot-toast";
 
 export default function FriendCard({ user, onFriendRemoved, isSuggestion = false }) {
+  const [requestStatus, setRequestStatus] = useState("none"); // "none" | "pending"
+  const [requestId, setRequestId] = useState(null);
   const handleUnfriend = async () => {
     if (window.confirm(`Bạn có chắc muốn hủy kết bạn với ${user.displayName || user.name}?`)) {
       try {
@@ -17,10 +20,26 @@ export default function FriendCard({ user, onFriendRemoved, isSuggestion = false
 
   const handleAddFriend = async () => {
     try {
-      await sendFriendRequest(user.id);
+      const res = await sendFriendRequest(user.id);
       toast.success("Đã gửi lời mời kết bạn!");
+      setRequestStatus("pending");
+      if (res.data && res.data.request) {
+        setRequestId(res.data.request.id);
+      }
     } catch (err) {
       toast.error("Không thể gửi kết bạn. Có thể đã gửi rồi.");
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!requestId) return;
+    try {
+      await rejectRequest(requestId);
+      toast.success("Đã hủy lời mời kết bạn!");
+      setRequestStatus("none");
+      setRequestId(null);
+    } catch (err) {
+      toast.error("Lỗi khi hủy lời mời kết bạn");
     }
   };
 
@@ -48,12 +67,26 @@ export default function FriendCard({ user, onFriendRemoved, isSuggestion = false
 
       {/* BUTTON */}
       {isSuggestion ? (
-        <button 
-          onClick={handleAddFriend}
-          className="bg-orange-50 text-orange-500 px-4 py-1 rounded-full text-sm hover:bg-orange-100 transition-colors font-medium"
-        >
-          + Kết bạn
-        </button>
+        requestStatus === "pending" ? (
+          <div className="flex items-center gap-2">
+            <button className="bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-4 py-1 rounded-full text-sm font-medium cursor-default border border-gray-200 dark:border-gray-600">
+              Chờ phản hồi
+            </button>
+            <button 
+              onClick={handleCancelRequest}
+              className="bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 px-4 py-1 rounded-full text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors font-medium border border-red-100 dark:border-red-900/30"
+            >
+              Hủy lời mời
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={handleAddFriend}
+            className="bg-orange-50 dark:bg-orange-900/20 text-orange-500 px-4 py-1 rounded-full text-sm hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors font-medium border border-orange-100 dark:border-orange-900/30"
+          >
+            + Kết bạn
+          </button>
+        )
       ) : (
         <button 
           onClick={handleUnfriend}

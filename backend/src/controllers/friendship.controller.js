@@ -146,3 +146,28 @@ exports.getRequests = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getUserFriends = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const friendsAsUser1 = await prisma.friendship.findMany({
+      where: { user1Id: userId, status: 'ACCEPTED' },
+      include: { user2: { select: { id: true, displayName: true, avatar: true, email: true } } }
+    });
+
+    const friendsAsUser2 = await prisma.friendship.findMany({
+      where: { user2Id: userId, status: 'ACCEPTED' },
+      include: { user1: { select: { id: true, displayName: true, avatar: true, email: true } } }
+    });
+
+    const friendsList = [
+      ...friendsAsUser1.map(f => f.user2),
+      ...friendsAsUser2.map(f => f.user1)
+    ];
+
+    res.status(200).json({ friends: friendsList });
+  } catch (error) {
+    next(error);
+  }
+};

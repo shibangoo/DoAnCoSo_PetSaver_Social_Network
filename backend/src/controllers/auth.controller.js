@@ -252,12 +252,27 @@ exports.getUserProfile = async (req, res, next) => {
         OR: [
           { user1Id: req.user.userId, user2Id: userId },
           { user1Id: userId, user2Id: req.user.userId }
-        ],
-        status: 'ACCEPTED'
+        ]
       }
     });
 
-    res.status(200).json({ ...user, isFriend: !!friendship });
+    let friendshipState = 'NONE';
+    let requestId = null;
+
+    if (friendship) {
+      if (friendship.status === 'ACCEPTED') {
+        friendshipState = 'FRIENDS';
+      } else if (friendship.status === 'PENDING') {
+        requestId = friendship.id;
+        if (friendship.user1Id === req.user.userId) {
+          friendshipState = 'SENT_REQUEST';
+        } else {
+          friendshipState = 'RECEIVED_REQUEST';
+        }
+      }
+    }
+
+    res.status(200).json({ ...user, isFriend: friendshipState === 'FRIENDS', friendshipState, requestId });
   } catch (error) {
     next(error);
   }

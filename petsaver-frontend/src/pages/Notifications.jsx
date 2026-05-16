@@ -93,7 +93,7 @@ export default function Notifications() {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           {loading ? (
             <p className="p-4 text-gray-500 dark:text-gray-400">Đang tải thông báo...</p>
           ) : notifications.length > 0 ? (
@@ -101,7 +101,7 @@ export default function Notifications() {
               <div 
                 key={notif.id} 
                 onClick={() => markAsReadAndNavigate(notif)}
-                className={`group relative p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer transition-colors flex items-start gap-3
+                className={`group relative p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer transition-colors flex items-start gap-3 first:rounded-t-2xl last:rounded-b-2xl last:border-b-0
                   ${notif.isRead 
                     ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750' 
                     : 'bg-orange-50/50 dark:bg-orange-900/10 hover:bg-orange-50 dark:hover:bg-orange-900/20'}`}

@@ -78,6 +78,7 @@ export default function Friends() {
                 onRequestHandled={() => {
                   fetchRequests();
                   fetchFriends();
+                  fetchSuggestions();
                 }}
               />
             )) : <p className="dark:text-gray-300">Không có lời mời kết bạn nào.</p>

@@ -2,17 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAvatar } from "../utils/avatar";
 import { getMe } from "../services/auth.service";
+import { getFriends } from "../services/friend.service";
 import PostCard from "../components/post/PostCard";
 import PetCard from "../components/pet/PetCard";
 import AddPetModal from "../components/pet/AddPetModal";
 import EditProfileModal from "../components/profile/EditProfileModal";
+import FriendListModal from "../components/profile/FriendListModal";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openAddPet, setOpenAddPet] = useState(false);
   const [openEditProfile, setOpenEditProfile] = useState(false);
+  const [openFriendsModal, setOpenFriendsModal] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -37,8 +41,18 @@ export default function Profile() {
     }
   };
 
+  const fetchFriendsList = async () => {
+    try {
+      const res = await getFriends();
+      setFriends(res.data.friends || []);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách bạn bè:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+    fetchFriendsList();
   }, []);
 
   if (loading) {
@@ -126,6 +140,39 @@ export default function Profile() {
               )}
             </div>
           </div>
+
+          {/* FRIENDS SECTION */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5 border border-gray-100 dark:border-gray-700 sticky top-[22rem] mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">Bạn bè ({friends.length})</h3>
+              {friends.length > 0 && (
+                <button 
+                  onClick={() => setOpenFriendsModal(true)}
+                  className="text-orange-500 text-sm hover:underline font-medium"
+                >
+                  Xem tất cả
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {friends.length > 0 ? (
+                friends.slice(0, 6).map(friend => (
+                  <img
+                    key={friend.id}
+                    src={getAvatar(friend.avatar)}
+                    title={friend.displayName}
+                    className="w-12 h-12 rounded-full object-cover bg-gray-200 dark:bg-gray-700 cursor-pointer border border-gray-100 dark:border-gray-600 hover:scale-105 transition-transform"
+                    onClick={() => navigate(`/profile/${friend.id}`)}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 w-full text-center py-2">
+                  Chưa có bạn bè nào
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* RIGHT COLUMN: POSTS */}
@@ -157,6 +204,12 @@ export default function Profile() {
         onClose={() => setOpenEditProfile(false)}
         currentProfile={profile}
         onProfileUpdated={fetchProfile}
+      />
+
+      <FriendListModal
+        isOpen={openFriendsModal}
+        onClose={() => setOpenFriendsModal(false)}
+        friends={friends}
       />
     </div>
   );

@@ -4,6 +4,10 @@ import API from "./api";
 export const getFriends = () =>
   API.get("/friends");
 
+// get user friends
+export const getUserFriends = (userId) =>
+  API.get(`/friends/${userId}/list`);
+
 // get friend requests
 export const getRequests = () =>
   API.get("/friends/requests");
