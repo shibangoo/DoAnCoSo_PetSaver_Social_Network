@@ -19,7 +19,9 @@ const aiRoutes = require('./routes/ai.routes');
 const friendshipRoutes = require('./routes/friendship.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const searchRoutes = require('./routes/search.routes');
+const adminRoutes = require('./routes/admin.routes');
 const { apiLimiter } = require('./middlewares/rateLimiter');
+const startCronJobs = require('./utils/cronJobs');
 
 // Đăng ký luồng đi: 
 app.use('/api', apiLimiter); // Apply general rate limiter to all API routes
@@ -32,6 +34,10 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/friends', friendshipRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/v1/admin', adminRoutes);
+
+// Khởi động các tác vụ định kỳ
+startCronJobs();
 
 // Định nghĩa cổng để chạy server
 const PORT = process.env.PORT || 3000;

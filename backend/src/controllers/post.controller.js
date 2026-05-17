@@ -100,7 +100,7 @@ exports.getAllPosts = async (req, res) => {
 
         const posts = await prisma.post.findMany({
             where: {
-                author: { isDeactivated: false },
+                author: { isDeactivated: false, status: 'ACTIVE' },
                 authorId: { notIn: blockedUserIds }
             },
             orderBy: {

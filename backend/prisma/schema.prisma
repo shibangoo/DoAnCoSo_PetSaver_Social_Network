@@ -16,11 +16,14 @@ model User {
   coverImage  String? @db.NVarChar(Max)
   dob         DateTime?
   bio         String? @db.NVarChar(Max)
-  role        String     @default("USER")
+  role        String     @default("USER") // USER, ADMIN, SUPER_ADMIN
+  status      String     @default("ACTIVE") // ACTIVE, BANNED
+  bannedAt    DateTime?
 
   accountType String     @default("PERSONAL") 
   petLimit    Int        @default(5)
   isDeactivated Boolean  @default(false)
+  createdAt   DateTime   @default(now())
 
   posts       Post[]    
   reactions   Reaction[]
@@ -43,6 +46,9 @@ model User {
   invitesReceived CoOwnerInvitation[] @relation("Invitee")
 
   deletionRequests PetDeletionRequest[]
+
+  reportsSent Report[]   @relation("ReportedBy")
+  auditLogs   AuditLog[] @relation("AdminActions")
 }
 
 model TagBlock {
@@ -213,4 +219,27 @@ model Notification {
   createdAt   DateTime @default(now())
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Report {
+  id          Int      @id @default(autoincrement())
+  reporterId  Int
+  targetType  String   // USER, POST, COMMENT
+  targetId    Int
+  reason      String   @db.NVarChar(Max)
+  status      String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reporter    User     @relation("ReportedBy", fields: [reporterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  adminId     Int
+  action      String
+  details     String   @db.NVarChar(Max) // JSON representation
+  createdAt   DateTime @default(now())
+
+  admin       User     @relation("AdminActions", fields: [adminId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

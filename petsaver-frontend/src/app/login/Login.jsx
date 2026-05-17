@@ -35,7 +35,13 @@ export default function Login() {
       }
 
       toast.success("Đăng nhập thành công!", { position: "top-center" });
-      navigate("/home");
+
+      // Redirect based on role
+      if (res.data.user && (res.data.user.role === 'ADMIN' || res.data.user.role === 'SUPER_ADMIN')) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/home");
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Lỗi đăng nhập", { position: "top-center" });
     } finally {
@@ -45,7 +51,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f5f6f8] dark:bg-gray-900 px-4 transition-colors duration-200">
-      
+
       {/* Nút chuyển theme ở góc trên phải */}
       <button
         onClick={toggleTheme}
@@ -86,11 +92,10 @@ export default function Login() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className={`w-full bg-orange-500 text-white p-4 rounded-xl font-medium shadow-sm transition-all duration-300 ${
-            loading
+          className={`w-full bg-orange-500 text-white p-4 rounded-xl font-medium shadow-sm transition-all duration-300 ${loading
               ? "opacity-70 cursor-not-allowed"
               : "hover:bg-orange-600 hover:shadow-lg hover:-translate-y-1 active:scale-95"
-          }`}
+            }`}
         >
           {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
