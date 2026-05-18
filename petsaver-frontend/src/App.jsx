@@ -15,6 +15,14 @@ import Register from "./app/register/Register";
 import Forgot from "./app/forgot/Forgot";
 import ProtectedRoute from "./app/ProtectedRoute";
 import FloatingChatbot from "./components/chat/FloatingChatbot";
+
+// Admin
+import AdminLayout from "./app/admin/AdminLayout";
+import AdminDashboard from "./app/admin/AdminDashboard";
+import AdminUsers from "./app/admin/AdminUsers";
+import AdminReports from "./app/admin/AdminReports";
+import AdminAuditLogs from "./app/admin/AdminAuditLogs";
+
 import "./styles/index.css";
 
 
@@ -43,6 +51,14 @@ function App() {
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
           <Route path="/pet/:id" element={<ProtectedRoute><PetDetail /></ProtectedRoute>} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="audit-logs" element={<AdminAuditLogs />} />
+          </Route>
         </Routes>
         
         {/* Global Chatbot */}
