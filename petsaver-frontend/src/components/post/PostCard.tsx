@@ -6,6 +6,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import EditPostModal from "./EditPostModal";
 import CommentSection from "./CommentSection";
+import SharePostModal from "./SharePostModal";
 
 export default function PostCard({ post, onPostUpdated }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -13,6 +14,7 @@ export default function PostCard({ post, onPostUpdated }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNotiModal, setShowNotiModal] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const isAuthor = Number(user?.id) === Number(post.authorId);
   
   // Kiểm tra xem user hiện tại đã thả cảm xúc bài này chưa
@@ -147,6 +149,42 @@ export default function PostCard({ post, onPostUpdated }) {
           />
         </div>
       )}
+
+      {/* SHARED POST */}
+      {post.sharedPost && (
+        <div className="rounded-xl p-4 mt-3 mb-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+             onClick={() => window.location.href = `/profile/${post.sharedPost.author?.id}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <img
+              src={getAvatar(post.sharedPost.author?.avatar)}
+              className="w-8 h-8 rounded-full object-cover"
+              alt=""
+            />
+            <div>
+              <p className="font-bold text-sm text-gray-800 dark:text-gray-100">
+                {post.sharedPost.author?.displayName || "User"}
+              </p>
+              <p className="text-[10px] text-gray-400">
+                {new Date(post.sharedPost.createdAt).toLocaleString('vi-VN')}
+              </p>
+            </div>
+          </div>
+          {post.sharedPost.content && (
+            <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap mb-2 line-clamp-3">
+              {post.sharedPost.content}
+            </p>
+          )}
+          {post.sharedPost.image && (
+            <div className="rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800">
+              <img
+                src={post.sharedPost.image}
+                className="w-full max-h-[300px] object-cover"
+                alt="Shared content"
+              />
+            </div>
+          )}
+        </div>
+      )}
       
       {/* STATS */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-2">
@@ -178,7 +216,10 @@ export default function PostCard({ post, onPostUpdated }) {
           <span>Bình luận</span>
         </button>
         
-        <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all text-gray-500 dark:text-gray-400 font-medium hidden sm:flex">
+        <button 
+          onClick={() => setShowShareModal(true)}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all text-gray-500 dark:text-gray-400 font-medium hidden sm:flex"
+        >
           <FaShare className="text-gray-400" />
           <span>Chia sẻ</span>
         </button>
@@ -192,6 +233,13 @@ export default function PostCard({ post, onPostUpdated }) {
         onClose={() => setShowEditModal(false)} 
         currentPost={post} 
         onPostUpdated={onPostUpdated} 
+      />
+
+      <SharePostModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        post={post}
+        onPostUpdated={onPostUpdated}
       />
 
       {/* NOTI MODAL FOR ALL */}

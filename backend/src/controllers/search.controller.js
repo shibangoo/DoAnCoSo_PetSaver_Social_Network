@@ -9,9 +9,6 @@ exports.getExploreContent = async (req, res, next) => {
     // Fetch trending/random posts
     const trendingPosts = await prisma.post.findMany({
       take: 10,
-      where: {
-        isPermanentlyDeleted: false
-      },
       orderBy: {
         comments: {
           _count: 'desc'
@@ -92,7 +89,6 @@ exports.searchAll = async (req, res, next) => {
     // Search Posts
     const posts = await prisma.post.findMany({
       where: {
-        isPermanentlyDeleted: false,
         content: searchQuery
       },
       take: 10,

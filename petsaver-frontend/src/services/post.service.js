@@ -22,3 +22,7 @@ export const updatePost = (postId, data) =>
 // delete post
 export const deletePost = (postId) =>
   API.delete(`/posts/${postId}`);
+
+// share post
+export const sharePost = (sharedPostId, content = "") =>
+  API.post("/posts/create", { sharedPostId, content });
