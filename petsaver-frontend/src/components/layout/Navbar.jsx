@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getAvatar } from "../../utils/avatar";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useContext(AuthContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -66,6 +67,20 @@ export default function Navbar() {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm px-5 py-3 flex items-center gap-4 mb-4 transition-colors">
+
+      {/* LOGO */}
+      <div 
+        onClick={() => {
+          if (location.pathname === "/home") {
+            window.dispatchEvent(new Event("reloadFeed"));
+          } else {
+            navigate("/home");
+          }
+        }} 
+        className="text-xl font-bold text-orange-500 flex items-center gap-2 cursor-pointer mr-2 md:mr-4"
+      >
+        🐾 <span className="hidden sm:block text-lg">PetSaver</span>
+      </div>
 
       {/* SEARCH */}
       <div ref={searchRef} className="flex-1 relative">

@@ -94,7 +94,7 @@ export default function FloatingChatbot() {
             
             {messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.isBot ? "justify-start" : "justify-end"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.isBot ? "bg-white border border-gray-100 text-gray-800 shadow-sm rounded-tl-none" : "bg-orange-500 text-white shadow-sm rounded-tr-none"}`}>
+                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.isBot ? "bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-gray-100 shadow-sm rounded-tl-none" : "bg-orange-500 text-white shadow-sm rounded-tr-none"}`}>
                   {msg.text}
                 </div>
               </div>

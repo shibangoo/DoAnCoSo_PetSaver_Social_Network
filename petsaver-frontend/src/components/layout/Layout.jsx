@@ -1,6 +1,10 @@
+import SidebarLeft from "./SidebarLeft";
+import SidebarRight from "./SidebarRight";
+
 export default function Layout({ children }) {
   return (
-    <div className="bg-[#f6f7fb] min-h-screen flex">
+    <div className="bg-[#f6f7fb] min-h-screen flex flex-col">
+      <div className="flex-1 flex">
 
       {/* LEFT */}
       <div className="w-64 p-4">
@@ -17,6 +21,7 @@ export default function Layout({ children }) {
         <SidebarRight />
       </div>
 
+      </div>
     </div>
   );
 }

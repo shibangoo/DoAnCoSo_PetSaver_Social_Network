@@ -6,6 +6,7 @@ import CreatePost from "../components/post/CreatePost";
 import PostCard from "../components/post/PostCard";
 import { getPosts } from "../services/post.service";
 import CreatePostModal from "../components/post/CreatePostModal";
+import SosFloatingCanvas from "../components/post/SosFloatingCanvas";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -66,6 +67,8 @@ export default function Home() {
       {/* CENTER */}
       <div className="flex-1 max-w-2xl mx-auto p-4">
         <Navbar />
+
+        <SosFloatingCanvas />
 
         {/* CLICK → OPEN MODAL */}
         <CreatePost

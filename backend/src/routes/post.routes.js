@@ -8,6 +8,7 @@ router.post('/create', verifyToken, postController.createPost); //tao bai viet
 router.put('/:postId', verifyToken, postController.updatePost); //chỉnh sửa bài viết
 router.delete('/:postId', verifyToken, postController.deletePost); //xóa bài viết
 
+router.get('/sos', postController.getSosPosts); // lay cac bai SOS
 router.get('/', postController.getAllPosts); //lay feed
 
 router.post('/:postId/react', verifyToken, postController.toggleReaction); //reaction

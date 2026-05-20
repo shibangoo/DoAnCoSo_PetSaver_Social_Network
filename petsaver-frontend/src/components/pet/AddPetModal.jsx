@@ -65,7 +65,7 @@ export default function AddPetModal({ isOpen, onClose, onPetAdded }) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       
       <div className="relative bg-white w-full max-w-md rounded-3xl shadow-xl p-6 animate-fade-in">
-        <h3 className="font-bold text-2xl text-center mb-6 text-gray-800">Tạo Hồ Sơ Thú Cưng</h3>
+        <h3 className="font-bold text-2xl text-center mb-6 text-gray-800 dark:text-white">Tạo Hồ Sơ Thú Cưng</h3>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Avatar Upload */}

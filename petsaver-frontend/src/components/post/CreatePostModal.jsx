@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 export default function CreatePostModal({ isOpen, onClose, user }) {
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const [feeling, setFeeling] = useState("");
+  const [showFeelings, setShowFeelings] = useState(false);
+  const feelingsList = ["😊 Hạnh phúc", "😢 Buồn", "🤩 Hào hứng", "🥰 Yêu đời", "😡 Tức giận", "😴 Buồn ngủ", "🥳 Chúc mừng"];
   
   // SOS Fields
   const [isLostPet, setIsLostPet] = useState(false);
@@ -22,6 +25,8 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
     if (!loading) {
       setContent("");
       setImage(null);
+      setFeeling("");
+      setShowFeelings(false);
       setIsLostPet(false);
       setLastSeenLocation("");
       setReward("");
@@ -33,10 +38,14 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Ảnh không được vượt quá 5MB", { position: "top-center" });
+      const isVideo = file.type.startsWith('video/');
+      const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024; // 20MB for video, 5MB for image
+      
+      if (file.size > maxSize) {
+        toast.error(`${isVideo ? 'Video' : 'Ảnh'} không được vượt quá ${isVideo ? '20MB' : '5MB'}`, { position: "top-center" });
         return;
       }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImage(reader.result);
@@ -61,6 +70,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
       await createPost({ 
         content, 
         image,
+        feeling,
         isLostPet,
         lastSeenLocation: isLostPet ? lastSeenLocation : undefined,
         reward: isLostPet ? reward : undefined,
@@ -117,6 +127,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
               <div>
                 <span className="font-bold text-gray-800 dark:text-white block">
                   {user?.displayName || "User"}
+                  {feeling && <span className="font-normal text-gray-600 dark:text-gray-300 ml-1">đang cảm thấy {feeling}</span>}
                 </span>
                 <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-md font-medium">Cộng đồng PetSaver</span>
               </div>
@@ -164,14 +175,42 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
           {/* IMAGE PREVIEW */}
           {image && (
             <div className="relative mb-4 group animate-fade-in">
-              <img src={image} alt="Preview" className="w-full max-h-64 object-cover rounded-xl border border-gray-100 bg-gray-50" />
+              {image.startsWith('data:video/') ? (
+                  <video src={image} controls className="w-full max-h-64 object-cover rounded-xl border border-gray-100 bg-gray-50" />
+              ) : (
+                  <img src={image} alt="Preview" className="w-full max-h-64 object-cover rounded-xl border border-gray-100 bg-gray-50" />
+              )}
               <button
                 onClick={() => setImage(null)}
-                className="absolute top-2 right-2 bg-gray-800/70 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-800"
+                className="absolute top-2 right-2 bg-gray-800/70 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-800 z-10"
               >
                 ✕
               </button>
             </div>
+          )}
+
+          {/* FEELINGS PICKER */}
+          {showFeelings && (
+              <div className="mb-4 animate-fade-in border border-gray-100 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-[#2a2a2a]">
+                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Bạn đang cảm thấy thế nào?</p>
+                  <div className="flex flex-wrap gap-2">
+                      {feelingsList.map(f => (
+                          <div 
+                              key={f}
+                              onClick={() => { setFeeling(f); setShowFeelings(false); }}
+                              className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm cursor-pointer hover:bg-orange-50 dark:hover:bg-gray-700 hover:border-orange-200 transition-colors"
+                          >
+                              {f}
+                          </div>
+                      ))}
+                      <div 
+                          onClick={() => { setFeeling(""); setShowFeelings(false); }}
+                          className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 rounded-full text-sm cursor-pointer hover:bg-gray-300 transition-colors"
+                      >
+                          ✕ Hủy
+                      </div>
+                  </div>
+              </div>
           )}
         </div>
 
@@ -182,9 +221,16 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
 
             <div className="flex gap-2">
               <button 
+                onClick={() => setShowFeelings(!showFeelings)}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border border-gray-200 shadow-sm"
+                title="Cảm xúc"
+              >
+                <span className="text-xl">😊</span>
+              </button>
+              <button 
                 onClick={() => fileInputRef.current?.click()}
                 className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border border-gray-200 shadow-sm"
-                title="Thêm ảnh"
+                title="Thêm ảnh/video"
               >
                 <svg className="w-5 h-5 stroke-orange-500 fill-none stroke-2 pointer-events-none" viewBox="0 0 24 24">
                   <rect x="3" y="5" width="18" height="14" rx="3" />
@@ -194,7 +240,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
               </button>
               <input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*,video/*" 
                 className="hidden" 
                 ref={fileInputRef}
                 onChange={handleImageChange}

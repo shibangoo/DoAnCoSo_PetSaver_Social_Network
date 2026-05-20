@@ -56,6 +56,37 @@ exports.acceptRequest = async (req, res, next) => {
       data: { status: 'ACCEPTED' }
     });
 
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    // Send notification to the requester (user1) that user2 accepted
+    await prisma.notification.create({
+      data: {
+        userId: request.user1Id,
+        type: 'FRIEND_ACCEPT',
+        message: `${user.displayName || 'Ai đó'} đã chấp nhận lời mời kết bạn. Hai bạn đã là bạn bè!`,
+        referenceId: userId
+      }
+    });
+
+    // Also auto-accept any pending conversations between these two users
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        status: 'PENDING',
+        participants: {
+          every: {
+            userId: { in: [request.user1Id, userId] }
+          }
+        }
+      }
+    });
+
+    for (const conv of conversations) {
+      await prisma.conversation.update({
+        where: { id: conv.id },
+        data: { status: 'ACCEPTED' }
+      });
+    }
+
     res.status(200).json({ message: "Đã chấp nhận kết bạn" });
   } catch (error) {
     next(error);

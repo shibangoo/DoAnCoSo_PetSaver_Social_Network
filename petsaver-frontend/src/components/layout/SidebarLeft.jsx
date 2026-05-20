@@ -10,6 +10,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API from "../../services/api";
+import { getUnreadCount as getMessageUnreadCount } from "../../services/message.service";
 import CreatePostModal from "../post/CreatePostModal";
 
 /* ================= ITEM ================= */
@@ -45,6 +46,7 @@ export default function SidebarLeft() {
   const location = useLocation();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [messageUnreadCount, setMessageUnreadCount] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -58,6 +60,13 @@ export default function SidebarLeft() {
       } catch (err) {
         console.error("Lỗi đếm thông báo:", err);
       }
+      
+      try {
+        const msgRes = await getMessageUnreadCount();
+        setMessageUnreadCount(msgRes.count);
+      } catch (err) {
+        console.error("Lỗi đếm tin nhắn:", err);
+      }
     };
     
     fetchUnreadCount();
@@ -68,15 +77,7 @@ export default function SidebarLeft() {
   }, []);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 h-full transition-colors">
-
-      {/* LOGO */}
-      <h1
-        onClick={() => window.location.reload()}
-        className="text-xl font-bold text-orange-500 mb-6 flex items-center gap-2 cursor-pointer"
-      >
-        🐾 PetSaver
-      </h1>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 h-full transition-colors flex flex-col pt-6">
 
       {/* MENU */}
       <div className="space-y-2">
@@ -119,6 +120,7 @@ export default function SidebarLeft() {
         <Item
           icon={<MessageSymbol />}
           text="Messages"
+          badge={messageUnreadCount > 0 ? messageUnreadCount : null}
           active={path === "/messages"}
           onClick={() => navigate("/messages")}
         />

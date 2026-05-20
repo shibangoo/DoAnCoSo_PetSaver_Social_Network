@@ -76,12 +76,13 @@ export default function PostCard({ post, onPostUpdated }) {
         <div>
           <div className="flex items-center gap-2">
             <p 
-              className="font-bold text-gray-800 dark:text-gray-100 cursor-pointer hover:underline"
+              className="font-bold text-gray-800 dark:text-gray-100 cursor-pointer hover:underline flex flex-wrap items-center gap-1"
               onClick={() => window.location.href = `/profile/${post.author?.id}`}
             >
-              {post.author?.displayName || "User"}
+              <span>{post.author?.displayName || "User"}</span>
+              {post.feeling && <span className="font-normal text-gray-600 dark:text-gray-400 text-sm">đang cảm thấy {post.feeling}</span>}
             </p>
-            {isLost && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-red-200">Tìm thú lạc</span>}
+            {isLost && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-red-200 whitespace-nowrap">Tìm thú lạc</span>}
           </div>
           <p className="text-xs text-gray-400">
             {new Date(post.createdAt).toLocaleString('vi-VN')}
@@ -139,14 +140,22 @@ export default function PostCard({ post, onPostUpdated }) {
         <p className={`text-gray-700 dark:text-gray-200 whitespace-pre-wrap mb-3 text-[15px] ${isLost ? 'font-medium' : ''}`}>{post.content}</p>
       )}
 
-      {/* IMAGE */}
+      {/* MEDIA */}
       {post.image && (
         <div className="rounded-xl overflow-hidden mt-3 mb-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
-          <img
-            src={post.image}
-            className="w-full h-auto max-h-[500px] object-cover"
-            alt="Post content"
-          />
+          {(post.image.startsWith('data:video/') || post.image.match(/\.(mp4|webm|ogg)$/i)) ? (
+              <video
+                src={post.image}
+                controls
+                className="w-full h-auto max-h-[500px] object-cover"
+              />
+          ) : (
+              <img
+                src={post.image}
+                className="w-full h-auto max-h-[500px] object-cover"
+                alt="Post content"
+              />
+          )}
         </div>
       )}
 

@@ -20,6 +20,7 @@ const friendshipRoutes = require('./routes/friendship.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const searchRoutes = require('./routes/search.routes');
 const adminRoutes = require('./routes/admin.routes');
+const messageRoutes = require('./routes/message.routes');
 const { apiLimiter } = require('./middlewares/rateLimiter');
 const startCronJobs = require('./utils/cronJobs');
 
@@ -35,6 +36,7 @@ app.use('/api/friends', friendshipRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Khởi động các tác vụ định kỳ
 startCronJobs();
@@ -42,7 +44,35 @@ startCronJobs();
 // Định nghĩa cổng để chạy server
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+
+const io = new Server(server, {
+  cors: {
+    origin: "*", // allow all frontend origins in dev
+    methods: ["GET", "POST", "PUT", "DELETE"]
+  }
+});
+
+// Make io accessible in controllers
+app.set('io', io);
+
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // User joins their own room to receive private messages
+  socket.on('join', (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`User ${userId} joined their room`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`🚀 Mạng xã hội đang chạy tại: http://localhost:${PORT}`);
 });
 

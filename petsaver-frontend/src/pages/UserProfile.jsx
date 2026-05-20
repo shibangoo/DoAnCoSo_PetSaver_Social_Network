@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getAvatar } from "../utils/avatar";
 import { getUserProfile } from "../services/auth.service";
 import { sendFriendRequest, getUserFriends, acceptRequest, rejectRequest } from "../services/friend.service";
+import { createOrGetConversation } from "../services/message.service";
 import API from "../services/api";
 import PostCard from "../components/post/PostCard";
 import PetCard from "../components/pet/PetCard";
@@ -159,6 +160,17 @@ export default function UserProfile() {
     setShowMenu(false);
   };
 
+  const handleMessage = async () => {
+    try {
+      setLoading(true);
+      const conversation = await createOrGetConversation(id);
+      navigate('/messages', { state: { activeConversationId: conversation.id } });
+    } catch (err) {
+      toast.error("Không thể tạo cuộc trò chuyện");
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="text-center mt-20 dark:text-white">Đang tải...</div>;
   }
@@ -273,6 +285,17 @@ export default function UserProfile() {
               </div>
             )}
           </div>
+        )}
+
+        {/* MESSAGE BUTTON */}
+        {profile.id !== currentUser.id && (
+          <button 
+            onClick={handleMessage}
+            className="bg-blue-500 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-600 hover:shadow-md transition-all flex items-center gap-2"
+          >
+            Nhắn tin
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+          </button>
         )}
       </div>
 

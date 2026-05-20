@@ -5,13 +5,14 @@ const AppError = require('../utils/AppError');
 exports.createPost = async (req, res, next) => {
     try {
         const authorId = req.user.userId;
-        const { content, image, petIds, isLostPet, lastSeenLocation, coordinates, lostDate, reward, sharedPostId } = req.body;
+        const { content, image, petIds, isLostPet, lastSeenLocation, coordinates, lostDate, reward, sharedPostId, feeling } = req.body;
 
         const newPost = await prisma.post.create({
             data: {
                 content,
                 image,
                 authorId,
+                feeling,
                 isLostPet: isLostPet || false,
                 lastSeenLocation,
                 coordinates,
@@ -140,6 +141,30 @@ exports.getAllPosts = async (req, res) => {
         console.error("Loi tai bang tin:", error.message);
         console.error("Chi tiet:", error);
         res.status(500).json({ error: "Loi he thong khi tai bai viet", details: error.message });
+    }
+}
+
+exports.getSosPosts = async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            where: {
+                isLostPet: true,
+                author: { isDeactivated: false, status: 'ACTIVE' }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            take: 20, // limit for ticker
+            include: {
+                author: {
+                    select: { id: true, displayName: true, avatar: true }
+                }
+            }
+        });
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error("Loi tai SOS posts:", error.message);
+        res.status(500).json({ error: "Loi he thong khi tai SOS posts", details: error.message });
     }
 }
 
