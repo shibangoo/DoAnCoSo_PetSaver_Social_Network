@@ -1,11 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getAvatar } from "../../utils/avatar";
 import { createPost } from "../../services/post.service";
+import { getMe } from "../../services/auth.service";
 import toast from "react-hot-toast";
 
 export default function CreatePostModal({ isOpen, onClose, user }) {
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [feeling, setFeeling] = useState("");
   const [showFeelings, setShowFeelings] = useState(false);
   const feelingsList = ["😊 Hạnh phúc", "😢 Buồn", "🤩 Hào hứng", "🥰 Yêu đời", "😡 Tức giận", "😴 Buồn ngủ", "🥳 Chúc mừng"];
@@ -18,44 +19,82 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
 
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
+  
+  const [userPets, setUserPets] = useState([]);
+  const [selectedPets, setSelectedPets] = useState([]);
+  const [showPetSelector, setShowPetSelector] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      getMe().then(res => {
+        if (res.data && res.data.pets) {
+          setUserPets(res.data.pets);
+        }
+      }).catch(err => console.error("Lỗi lấy danh sách thú cưng", err));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleClose = () => {
     if (!loading) {
       setContent("");
-      setImage(null);
+      setImages([]);
       setFeeling("");
       setShowFeelings(false);
       setIsLostPet(false);
       setLastSeenLocation("");
       setReward("");
       setLostDate("");
+      setSelectedPets([]);
+      setShowPetSelector(false);
       onClose();
     }
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    
+    if (images.length + files.length > 5) {
+      toast.error("Chỉ được tải lên tối đa 5 ảnh/video", { position: "top-center" });
+      return;
+    }
+
+    const newImages = [];
+    let hasError = false;
+
+    files.forEach(file => {
       const isVideo = file.type.startsWith('video/');
-      const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024; // 20MB for video, 5MB for image
+      const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
       
       if (file.size > maxSize) {
-        toast.error(`${isVideo ? 'Video' : 'Ảnh'} không được vượt quá ${isVideo ? '20MB' : '5MB'}`, { position: "top-center" });
+        toast.error(`${file.name} vượt quá ${isVideo ? '20MB' : '5MB'}`, { position: "top-center" });
+        hasError = true;
         return;
       }
       
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result);
+        setImages(prev => [...prev, reader.result]);
       };
       reader.readAsDataURL(file);
+    });
+    
+    // reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const togglePetSelection = (pet) => {
+    if (selectedPets.find(p => p.id === pet.id)) {
+      setSelectedPets(selectedPets.filter(p => p.id !== pet.id));
+    } else {
+      setSelectedPets([...selectedPets, pet]);
     }
   };
 
   const handleSubmit = async () => {
-    if (!content.trim() && !image) {
+    if (!content.trim() && images.length === 0) {
       toast.error("Vui lòng nhập nội dung hoặc thêm ảnh", { position: "top-center" });
       return;
     }
@@ -67,9 +106,13 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
 
     try {
       setLoading(true);
+      const imagesPayload = images.length > 0 ? JSON.stringify(images) : undefined;
+      const petIdsPayload = selectedPets.length > 0 ? selectedPets.map(p => p.id) : undefined;
+
       await createPost({ 
         content, 
-        image,
+        image: imagesPayload,
+        petIds: petIdsPayload,
         feeling,
         isLostPet,
         lastSeenLocation: isLostPet ? lastSeenLocation : undefined,
@@ -141,6 +184,17 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
                 <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${isLostPet ? 'translate-x-5' : ''}`}></div>
               </div>
             </div>
+            {/* TAGGED PETS DISPLAY */}
+            {selectedPets.length > 0 && (
+              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                <span className="text-sm text-gray-500">cùng với</span>
+                {selectedPets.map(p => (
+                  <span key={p.id} className="text-sm font-semibold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                    {p.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* SOS FORM FIELDS */}
@@ -173,20 +227,51 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
           />
 
           {/* IMAGE PREVIEW */}
-          {image && (
-            <div className="relative mb-4 group animate-fade-in">
-              {image.startsWith('data:video/') ? (
-                  <video src={image} controls className="w-full max-h-64 object-cover rounded-xl border border-gray-100 bg-gray-50" />
-              ) : (
-                  <img src={image} alt="Preview" className="w-full max-h-64 object-cover rounded-xl border border-gray-100 bg-gray-50" />
-              )}
-              <button
-                onClick={() => setImage(null)}
-                className="absolute top-2 right-2 bg-gray-800/70 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-800 z-10"
-              >
-                ✕
-              </button>
+          {images.length > 0 && (
+            <div className={`grid gap-2 mb-4 animate-fade-in ${images.length === 1 ? 'grid-cols-1' : images.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
+              {images.map((imgUrl, index) => (
+                <div key={index} className="relative group">
+                  {imgUrl.startsWith('data:video/') ? (
+                      <video src={imgUrl} controls className="w-full h-48 object-cover rounded-xl border border-gray-100 bg-gray-50" />
+                  ) : (
+                      <img src={imgUrl} alt="Preview" className="w-full h-48 object-cover rounded-xl border border-gray-100 bg-gray-50" />
+                  )}
+                  <button
+                    onClick={() => setImages(images.filter((_, i) => i !== index))}
+                    className="absolute top-2 right-2 bg-gray-800/70 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-800 z-10"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
             </div>
+          )}
+
+          {/* PET SELECTOR */}
+          {showPetSelector && (
+              <div className="mb-4 animate-fade-in border border-gray-100 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-[#2a2a2a]">
+                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Tag thú cưng của bạn</p>
+                  {userPets.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                        {userPets.map(pet => {
+                            const isSelected = selectedPets.find(p => p.id === pet.id);
+                            return (
+                                <div 
+                                    key={pet.id}
+                                    onClick={() => togglePetSelection(pet)}
+                                    className={`px-3 py-1.5 border rounded-full text-sm cursor-pointer flex items-center gap-2 transition-colors
+                                        ${isSelected ? 'bg-orange-100 border-orange-300 text-orange-700' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-50'}`}
+                                >
+                                    <img src={pet.avatar || 'https://via.placeholder.com/30'} alt={pet.name} className="w-5 h-5 rounded-full object-cover" />
+                                    {pet.name}
+                                </div>
+                            );
+                        })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">Bạn chưa có thú cưng nào để tag.</p>
+                  )}
+              </div>
           )}
 
           {/* FEELINGS PICKER */}
@@ -228,6 +313,18 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
                 <span className="text-xl">😊</span>
               </button>
               <button 
+                onClick={() => { setShowPetSelector(!showPetSelector); setShowFeelings(false); }}
+                className={`w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border shadow-sm ${showPetSelector ? 'border-orange-400 bg-orange-50' : 'border-gray-200'}`}
+                title="Tag thú cưng"
+              >
+                <svg className="w-5 h-5 stroke-orange-500 fill-none stroke-2 pointer-events-none" viewBox="0 0 24 24">
+                  <circle cx="6" cy="9" r="2" />
+                  <circle cx="18" cy="9" r="2" />
+                  <circle cx="12" cy="7" r="2" />
+                  <path d="M5 17c0-3 14-3 14 0 0 2-3 3-7 3s-7-1-7-3z" />
+                </svg>
+              </button>
+              <button 
                 onClick={() => fileInputRef.current?.click()}
                 className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border border-gray-200 shadow-sm"
                 title="Thêm ảnh/video"
@@ -240,6 +337,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
               </button>
               <input 
                 type="file" 
+                multiple
                 accept="image/*,video/*" 
                 className="hidden" 
                 ref={fileInputRef}
@@ -251,9 +349,9 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
           {/* BUTTON */}
           <button 
             onClick={handleSubmit}
-            disabled={loading || (!content.trim() && !image)}
+            disabled={loading || (!content.trim() && images.length === 0)}
             className={`mt-3 w-full py-3 rounded-xl font-bold text-white transition-all duration-300 shadow-sm text-lg
-              ${loading || (!content.trim() && !image) 
+              ${loading || (!content.trim() && images.length === 0) 
                 ? 'bg-gray-300 cursor-not-allowed' 
                 : isLostPet ? 'bg-red-600 hover:bg-red-700 hover:shadow-lg active:scale-95 shadow-red-200 animate-pulse' : 'bg-orange-500 hover:bg-orange-600 hover:shadow-md active:scale-95'}`}
           >

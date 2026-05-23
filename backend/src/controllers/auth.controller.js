@@ -154,7 +154,7 @@ exports.getMe = async (req, res, next) => {
         role: true,
         accountType: true,
         pets: {
-          where: { isPermanentlyDeleted: false },
+          where: { isPermanentlyDeleted: false, deletedAt: null },
           orderBy: { createdAt: 'desc' }
         },
         posts: {
@@ -224,7 +224,7 @@ exports.getUserProfile = async (req, res, next) => {
         bio: true,
         isDeactivated: true,
         pets: {
-          where: { isPermanentlyDeleted: false },
+          where: { isPermanentlyDeleted: false, deletedAt: null },
           orderBy: { createdAt: 'desc' }
         },
         posts: {

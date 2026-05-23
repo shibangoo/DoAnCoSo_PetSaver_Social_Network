@@ -117,7 +117,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">Thú cưng ({profile.pets?.length || 0})</h3>
               <button 
-                onClick={() => setOpenAddPet(true)}
+                onClick={() => {
+                  if (profile.accountType === 'PERSONAL' && (profile.pets?.length || 0) >= 5) {
+                    toast.error("Bạn đã đạt giới hạn 5 thú cưng!", { position: "top-center" });
+                    return;
+                  }
+                  setOpenAddPet(true);
+                }}
                 className="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-100 transition-colors cursor-pointer"
                 title="Thêm thú cưng"
               >

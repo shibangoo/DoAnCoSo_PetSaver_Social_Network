@@ -23,6 +23,14 @@ export const restorePet = (id) => API.post(`/pets/${id}/restore`);
 export const transferOwnership = (id, newOwnerId) =>
   API.post(`/pets/${id}/transfer`, { newOwnerId });
 
+/** Mời đồng sở hữu */
+export const inviteCoOwner = (petId, inviteeId) =>
+  API.post(`/co-ownership/invite`, { petId, inviteeId });
+
+/** Phản hồi lời mời đồng sở hữu */
+export const respondToCoOwnerInvite = (inviteId, action) =>
+  API.post(`/co-ownership/invites/${inviteId}/respond`, { action });
+
 // ─────────────────────────────────────────────
 // TÌM KIẾM
 // ─────────────────────────────────────────────

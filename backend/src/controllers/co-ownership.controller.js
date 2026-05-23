@@ -16,6 +16,16 @@ exports.inviteCoOwner = async (req, res, next) => {
       data: { petId, inviterId, inviteeId }
     });
 
+    const inviter = await prisma.user.findUnique({ where: { id: inviterId }, select: { displayName: true } });
+    await prisma.notification.create({
+      data: {
+        userId: inviteeId,
+        type: 'CO_OWNER_INVITE',
+        message: `${inviter?.displayName || 'Ai đó'} đã mời bạn làm đồng sở hữu thú cưng ${pet.name}.`,
+        referenceId: newInvite.id
+      }
+    });
+
     res.status(201).json({ message: "Đã gửi lời mời đồng sở hữu", invite: newInvite });
   } catch (error) {
     next(error);
@@ -38,7 +48,7 @@ exports.respondToInvitation = async (req, res, next) => {
       await prisma.pet.update({ where: { id: invite.petId }, data: { coOwnerId: userId } });
       res.status(200).json({ message: "Đã chấp nhận lời mời" });
     } else {
-      await prisma.coOwnerInvitation.update({ where: { id: inviteId }, data: { status: 'REJECTED' } });
+      await prisma.coOwnerInvitation.delete({ where: { id: inviteId } });
       res.status(200).json({ message: "Đã từ chối lời mời" });
     }
   } catch (error) {

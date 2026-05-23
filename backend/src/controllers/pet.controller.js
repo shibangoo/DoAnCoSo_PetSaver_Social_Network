@@ -12,8 +12,9 @@ exports.createPet = async (req, res, next) => {
       include: { pets: true }
     });
 
-    if (user.accountType === 'PERSONAL' && user.pets.length >= user.petLimit) {
-      return next(new AppError(`Bạn đã đạt giới hạn ${user.petLimit} thú cưng. Vui lòng nâng cấp hoặc dùng tính năng AI đếm thú cưng để tăng giới hạn.`, 403, 'PET_LIMIT_REACHED'));
+    const effectiveLimit = Math.max(user.petLimit, 5); // Ensure limit is at least 5
+    if (user.accountType === 'PERSONAL' && user.pets.length >= effectiveLimit) {
+      return next(new AppError(`Bạn đã đạt giới hạn ${effectiveLimit} thú cưng. Vui lòng nâng cấp hoặc dùng tính năng AI đếm thú cưng để tăng giới hạn.`, 403, 'PET_LIMIT_REACHED'));
     }
 
     const newPet = await prisma.pet.create({
@@ -44,7 +45,7 @@ exports.getPetById = async (req, res, next) => {
       return next(new AppError('Không tìm thấy thú cưng', 404, 'PET_NOT_FOUND'));
     }
 
-    if (pet.isPermanentlyDeleted) {
+    if (pet.isPermanentlyDeleted || pet.deletedAt !== null) {
       return res.status(200).json({
         message: "Hồ sơ thú cưng này đã được chủ nhân gỡ bỏ khỏi PetSaver",
         isDeleted: true

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarLeft from "../components/layout/SidebarLeft";
 import Navbar from "../components/layout/Navbar";
 import API from "../services/api";
+import { respondToCoOwnerInvite } from "../services/pet.service";
 import toast from "react-hot-toast";
 
 export default function Notifications() {
@@ -72,6 +73,18 @@ export default function Notifications() {
     }
   };
 
+  const handleRespondInvite = async (e, notif, action) => {
+    e.stopPropagation();
+    try {
+      await respondToCoOwnerInvite(notif.referenceId, action);
+      toast.success(action === 'ACCEPT' ? "Đã chấp nhận lời mời" : "Đã từ chối lời mời");
+      // Mark notif as read and maybe delete or keep it
+      setNotifications(prev => prev.filter(n => n.id !== notif.id));
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Lỗi khi xử lý lời mời");
+    }
+  };
+
   return (
     <div className="bg-[#f5f6f8] dark:bg-gray-900 min-h-screen flex transition-colors">
       
@@ -110,9 +123,10 @@ export default function Notifications() {
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 
                   ${notif.type === 'REACTION' ? 'bg-red-100 text-red-500' : 
                     notif.type === 'COMMENT' ? 'bg-blue-100 text-blue-500' : 
-                    notif.type === 'FRIEND_REQUEST' ? 'bg-green-100 text-green-500' : 'bg-gray-100 text-gray-500'}`}
+                    notif.type === 'FRIEND_REQUEST' ? 'bg-green-100 text-green-500' : 
+                    notif.type === 'CO_OWNER_INVITE' ? 'bg-orange-100 text-orange-500' : 'bg-gray-100 text-gray-500'}`}
                 >
-                  {notif.type === 'REACTION' ? '❤️' : notif.type === 'COMMENT' ? '💬' : notif.type === 'FRIEND_REQUEST' ? '👋' : '🔔'}
+                  {notif.type === 'REACTION' ? '❤️' : notif.type === 'COMMENT' ? '💬' : notif.type === 'FRIEND_REQUEST' ? '👋' : notif.type === 'CO_OWNER_INVITE' ? '🐾' : '🔔'}
                 </div>
 
                 <div className="flex-1">
@@ -122,6 +136,23 @@ export default function Notifications() {
                   <p className={`text-xs mt-1 ${notif.isRead ? 'text-gray-400' : 'text-orange-500 font-medium'}`}>
                     {new Date(notif.createdAt).toLocaleString('vi-VN')}
                   </p>
+                  
+                  {notif.type === 'CO_OWNER_INVITE' && (
+                    <div className="flex gap-2 mt-3">
+                      <button 
+                        onClick={(e) => handleRespondInvite(e, notif, 'ACCEPT')}
+                        className="bg-orange-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-orange-600 transition"
+                      >
+                        Chấp nhận
+                      </button>
+                      <button 
+                        onClick={(e) => handleRespondInvite(e, notif, 'REJECT')}
+                        className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                      >
+                        Từ chối
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* DẤU CHẤM XANH NẾU CHƯA ĐỌC */}

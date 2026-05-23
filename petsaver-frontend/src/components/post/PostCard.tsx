@@ -80,6 +80,16 @@ export default function PostCard({ post, onPostUpdated }) {
               onClick={() => window.location.href = `/profile/${post.author?.id}`}
             >
               <span>{post.author?.displayName || "User"}</span>
+              {post.taggedPets && post.taggedPets.length > 0 && (
+                <span className="font-normal text-gray-500 text-sm">
+                  {" cùng với "}
+                  {post.taggedPets.map((p, i) => (
+                    <span key={p.id} className="font-semibold text-orange-500 hover:underline cursor-pointer" onClick={(e) => { e.stopPropagation(); window.location.href = `/pet/${p.id}`; }}>
+                      {p.name}{i < post.taggedPets.length - 1 ? ', ' : ''}
+                    </span>
+                  ))}
+                </span>
+              )}
               {post.feeling && <span className="font-normal text-gray-600 dark:text-gray-400 text-sm">đang cảm thấy {post.feeling}</span>}
             </p>
             {isLost && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-red-200 whitespace-nowrap">Tìm thú lạc</span>}
@@ -143,19 +153,39 @@ export default function PostCard({ post, onPostUpdated }) {
       {/* MEDIA */}
       {post.image && (
         <div className="rounded-xl overflow-hidden mt-3 mb-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700">
-          {(post.image.startsWith('data:video/') || post.image.match(/\.(mp4|webm|ogg)$/i)) ? (
-              <video
-                src={post.image}
-                controls
-                className="w-full h-auto max-h-[500px] object-cover"
-              />
-          ) : (
-              <img
-                src={post.image}
-                className="w-full h-auto max-h-[500px] object-cover"
-                alt="Post content"
-              />
-          )}
+          {(() => {
+            let images = [];
+            try {
+              images = JSON.parse(post.image);
+            } catch (e) {
+              images = [post.image];
+            }
+            if (!Array.isArray(images)) images = [post.image];
+
+            if (images.length === 1) {
+              const imgUrl = images[0];
+              return (imgUrl.startsWith('data:video/') || imgUrl.match(/\.(mp4|webm|ogg)$/i)) ? (
+                  <video src={imgUrl} controls className="w-full h-auto max-h-[500px] object-cover" />
+              ) : (
+                  <img src={imgUrl} className="w-full h-auto max-h-[500px] object-cover" alt="Post content" />
+              );
+            } else if (images.length > 1) {
+              return (
+                <div className={`grid gap-1 ${images.length === 2 ? 'grid-cols-2' : images.length === 3 ? 'grid-cols-2' : 'grid-cols-2'}`}>
+                  {images.map((imgUrl, idx) => (
+                    <div key={idx} className={`${images.length === 3 && idx === 0 ? 'col-span-2' : ''}`}>
+                      {(imgUrl.startsWith('data:video/') || imgUrl.match(/\.(mp4|webm|ogg)$/i)) ? (
+                        <video src={imgUrl} controls className="w-full h-48 sm:h-64 object-cover" />
+                      ) : (
+                        <img src={imgUrl} className="w-full h-48 sm:h-64 object-cover" alt={`Post content ${idx}`} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       )}
 

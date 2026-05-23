@@ -18,7 +18,7 @@ import {
 import Navbar from "../components/layout/Navbar";
 import SidebarLeft from "../components/layout/SidebarLeft";
 import PostCard from "../components/post/PostCard";
-import { getPetById } from "../services/pet.service";
+import { getPetById, softDeletePet } from "../services/pet.service";
 import { getAvatar } from "../utils/avatar";
 import API from "../services/api";
 import InviteCoOwnerModal from "../components/pet/InviteCoOwnerModal";
@@ -101,6 +101,8 @@ export default function PetDetail() {
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // ─ Fetch pet detail ────────────────────────────────────────────────────────
   const fetchPet = useCallback(async () => {
@@ -142,6 +144,21 @@ export default function PetDetail() {
     fetchPet();
     fetchTaggedPosts();
   }, [fetchPet, fetchTaggedPosts]);
+
+  const handleDeletePet = async () => {
+    try {
+      setDeleting(true);
+      await softDeletePet(id);
+      toast.success("Đã xóa hồ sơ thú cưng thành công");
+      setShowDeleteConfirm(false);
+      navigate("/profile");
+    } catch (err) {
+      console.error("Lỗi xóa thú cưng:", err);
+      toast.error(err.response?.data?.message || "Lỗi khi xóa thú cưng");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // ─ Computed flags ──────────────────────────────────────────────────────────
   const isOwner = pet && Number(currentUser?.id) === Number(pet.ownerId);
@@ -289,6 +306,14 @@ export default function PetDetail() {
 
                 {/* ACTION BUTTONS */}
                 <div className="flex gap-2 flex-wrap">
+                  {isOwner && (
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm px-4 py-2 rounded-xl font-medium transition-all active:scale-95 shadow-sm"
+                    >
+                      Xóa hồ sơ
+                    </button>
+                  )}
                   {isOwner && !pet.coOwnerId && (
                     <button
                       onClick={() => setShowInviteModal(true)}
@@ -404,6 +429,36 @@ export default function PetDetail() {
             toast.success("Đã gửi lời mời đồng sở hữu thành công!");
           }}
         />
+      )}
+
+      {/* MODAL: Xác nhận xóa thú cưng */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !deleting && setShowDeleteConfirm(false)} />
+          <div className="relative bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl shadow-xl p-6 text-center animate-fade-in">
+            <FaExclamationTriangle className="text-red-500 text-4xl mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Xóa hồ sơ thú cưng?</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+              Bạn có chắc chắn muốn xóa hồ sơ của <b>{pet.name}</b> không? Hành động này không thể hoàn tác ngay lập tức.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeletePet}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition disabled:bg-gray-400"
+              >
+                {deleting ? "Đang xóa..." : "Xóa hồ sơ"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
