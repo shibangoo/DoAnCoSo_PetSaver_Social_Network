@@ -125,19 +125,19 @@ export default function PostCard({ post, onPostUpdated }) {
       {isLost && (
         <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800/30 rounded-xl p-3 mb-3 text-sm space-y-2">
           {post.lastSeenLocation && (
-            <div className="flex items-start gap-2 text-red-800">
+            <div className="flex items-start gap-2 text-red-800 dark:text-red-200">
               <FaMapMarkerAlt className="mt-0.5 text-red-500 shrink-0" />
               <p><strong>Khu vực lạc:</strong> {post.lastSeenLocation}</p>
             </div>
           )}
           {post.lostDate && (
-            <div className="flex items-center gap-2 text-red-800">
+            <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
               <FaCalendarAlt className="text-red-500 shrink-0" />
               <p><strong>Ngày thất lạc:</strong> {new Date(post.lostDate).toLocaleDateString('vi-VN')}</p>
             </div>
           )}
           {post.reward && (
-            <div className="flex items-center gap-2 text-red-800">
+            <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
               <FaGift className="text-red-500 shrink-0" />
               <p><strong>Hậu tạ:</strong> <span className="font-bold">{post.reward}</span></p>
             </div>

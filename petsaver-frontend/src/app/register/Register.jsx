@@ -36,7 +36,7 @@ export default function Register() {
         navigate("/");
       }, 1500);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Lỗi đăng ký", { position: "top-center" });
+      toast.error(err.response?.data?.message || err.message || "Lỗi đăng ký", { position: "top-center" });
     } finally {
       setLoading(false);
     }

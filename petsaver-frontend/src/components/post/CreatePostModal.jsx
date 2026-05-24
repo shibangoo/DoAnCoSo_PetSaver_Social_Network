@@ -145,13 +145,13 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
       <div className={`relative bg-white dark:bg-[#1e1e1e] w-full max-w-xl rounded-2xl shadow-xl p-5 animate-fade-in flex flex-col max-h-[90vh] ${isLostPet ? 'border-2 border-red-500' : ''}`}>
 
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-4 border-b pb-3 border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4 border-b pb-3 border-gray-100 dark:border-gray-700 flex-shrink-0">
           <h3 className={`font-bold text-xl w-full text-center ${isLostPet ? 'text-red-600' : 'text-gray-800 dark:text-white'}`}>
             {isLostPet ? "🚨 Đăng tin Tìm Thú Lạc 🚨" : "Tạo bài viết mới"}
           </h3>
           <button
             onClick={handleClose}
-            className="absolute right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-100 hover:bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+            className="absolute right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
           >
             ✕
           </button>
@@ -177,10 +177,10 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
             </div>
 
             {/* LOST PET TOGGLE */}
-            <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-xl border border-red-100 cursor-pointer hover:bg-red-100 transition-colors" onClick={() => setIsLostPet(!isLostPet)}>
+            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 px-3 py-2 rounded-xl border border-red-100 dark:border-red-900/30 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors" onClick={() => setIsLostPet(!isLostPet)}>
               <span className="text-xl">🚨</span>
-              <span className="text-sm font-bold text-red-600 select-none">SOS Tìm thú</span>
-              <div className={`w-10 h-5 rounded-full relative transition-colors ${isLostPet ? 'bg-red-500' : 'bg-gray-300'}`}>
+              <span className="text-sm font-bold text-red-600 dark:text-red-400 select-none">SOS Tìm thú</span>
+              <div className={`w-10 h-5 rounded-full relative transition-colors ${isLostPet ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
                 <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${isLostPet ? 'translate-x-5' : ''}`}></div>
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
               <div className="flex items-center gap-1 mt-1 flex-wrap">
                 <span className="text-sm text-gray-500">cùng với</span>
                 {selectedPets.map(p => (
-                  <span key={p.id} className="text-sm font-semibold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                  <span key={p.id} className="text-sm font-semibold text-orange-500 bg-orange-50 dark:bg-orange-950/20 px-2 py-0.5 rounded-full border border-orange-100 dark:border-orange-900/30">
                     {p.name}
                   </span>
                 ))}
@@ -199,22 +199,39 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
 
           {/* SOS FORM FIELDS */}
           {isLostPet && (
-            <div className="bg-red-50 rounded-xl p-4 mb-4 border border-red-100 animate-fade-in space-y-3">
+            <div className="bg-red-50 dark:bg-red-950/10 rounded-xl p-4 mb-4 border border-red-100 dark:border-red-900/30 animate-fade-in space-y-3">
               <div>
-                <label className="block text-xs font-bold text-red-700 mb-1">Nơi bé đi lạc (Bắt buộc) *</label>
-                <input type="text" value={lastSeenLocation} onChange={e => setLastSeenLocation(e.target.value)} placeholder="VD: Công viên ABC, Quận 1..." className="w-full px-3 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-sm" />
+                <label className="block text-xs font-bold text-red-700 dark:text-red-400 mb-1">Nơi bé đi lạc (Bắt buộc) *</label>
+                <input 
+                  type="text" 
+                  value={lastSeenLocation} 
+                  onChange={e => setLastSeenLocation(e.target.value)} 
+                  placeholder="VD: Công viên ABC, Quận 1..." 
+                  className="w-full px-3 py-2 border border-red-200 dark:border-red-900/50 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-red-300 dark:placeholder-red-800" 
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-red-700 mb-1">Ngày thất lạc</label>
-                  <input type="date" value={lostDate} onChange={e => setLostDate(e.target.value)} className="w-full px-3 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-sm" />
+                  <label className="block text-xs font-bold text-red-700 dark:text-red-400 mb-1">Ngày thất lạc</label>
+                  <input 
+                    type="date" 
+                    value={lostDate} 
+                    onChange={e => setLostDate(e.target.value)} 
+                    className="w-full px-3 py-2 border border-red-200 dark:border-red-900/50 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100" 
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-red-700 mb-1">Hậu tạ (Tùy chọn)</label>
-                  <input type="text" value={reward} onChange={e => setReward(e.target.value)} placeholder="VD: 5.000.000đ" className="w-full px-3 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-sm" />
+                  <label className="block text-xs font-bold text-red-700 dark:text-red-400 mb-1">Hậu tạ (Tùy chọn)</label>
+                  <input 
+                    type="text" 
+                    value={reward} 
+                    onChange={e => setReward(e.target.value)} 
+                    placeholder="VD: 5.000.000đ" 
+                    className="w-full px-3 py-2 border border-red-200 dark:border-red-900/50 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-red-300 dark:placeholder-red-800" 
+                  />
                 </div>
               </div>
-              <p className="text-[11px] text-red-500 text-center font-medium">Bật chế độ này, bài viết của bạn sẽ được đánh dấu khẩn cấp trên Bảng tin.</p>
+              <p className="text-[11px] text-red-500 dark:text-red-400/80 text-center font-medium">Bật chế độ này, bài viết của bạn sẽ được đánh dấu khẩn cấp trên Bảng tin.</p>
             </div>
           )}
 
@@ -223,7 +240,11 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={isLostPet ? "Hãy mô tả đặc điểm nhận dạng của bé (Màu lông, vòng cổ, vết bớt...)" : `${user?.displayName || "Bạn"} ơi, bạn đang nghĩ gì thế?`}
-            className={`w-full min-h-[100px] resize-none outline-none bg-transparent text-lg text-gray-800 dark:text-white placeholder-gray-400 ${isLostPet ? 'text-red-900 placeholder-red-300' : ''}`}
+            className={`w-full min-h-[100px] resize-none outline-none bg-transparent text-lg placeholder-gray-400 ${
+              isLostPet 
+                ? 'text-red-900 dark:text-red-200 placeholder-red-300 dark:placeholder-red-700/50 font-medium' 
+                : 'text-gray-800 dark:text-white'
+            }`}
           />
 
           {/* IMAGE PREVIEW */}
@@ -300,21 +321,25 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
         </div>
 
         {/* ACTIONS & BUTTON */}
-        <div className="flex-shrink-0 pt-2 border-t mt-2">
-          <div className="border border-gray-100 dark:border-gray-700 rounded-xl p-3 flex items-center justify-between shadow-sm bg-gray-50">
+        <div className="flex-shrink-0 pt-2 border-t dark:border-gray-700 mt-2">
+          <div className="border border-gray-100 dark:border-gray-700 rounded-xl p-3 flex items-center justify-between shadow-sm bg-gray-50 dark:bg-gray-800/40">
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300 ml-2">Thêm vào bài viết</span>
 
             <div className="flex gap-2">
               <button 
                 onClick={() => setShowFeelings(!showFeelings)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border border-gray-200 shadow-sm"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 dark:hover:bg-orange-950/30 transition-colors cursor-pointer bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm"
                 title="Cảm xúc"
               >
                 <span className="text-xl">😊</span>
               </button>
               <button 
                 onClick={() => { setShowPetSelector(!showPetSelector); setShowFeelings(false); }}
-                className={`w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border shadow-sm ${showPetSelector ? 'border-orange-400 bg-orange-50' : 'border-gray-200'}`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 dark:hover:bg-orange-950/30 transition-colors cursor-pointer border shadow-sm ${
+                  showPetSelector 
+                    ? 'border-orange-400 dark:border-orange-500 bg-orange-50 dark:bg-orange-950/20' 
+                    : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                }`}
                 title="Tag thú cưng"
               >
                 <svg className="w-5 h-5 stroke-orange-500 fill-none stroke-2 pointer-events-none" viewBox="0 0 24 24">
@@ -326,7 +351,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
               </button>
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors cursor-pointer bg-white border border-gray-200 shadow-sm"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-orange-100 dark:hover:bg-orange-950/30 transition-colors cursor-pointer bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm"
                 title="Thêm ảnh/video"
               >
                 <svg className="w-5 h-5 stroke-orange-500 fill-none stroke-2 pointer-events-none" viewBox="0 0 24 24">

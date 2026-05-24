@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { chatWithBot } from "../../services/ai.service";
 import toast from "react-hot-toast";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,8 +10,19 @@ export default function FloatingChatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const token = localStorage.getItem("token");
-  if (!token) return null;
+  const { user } = useContext(AuthContext);
+
+  // Automatically reset chatbot state and history when user logs out
+  useEffect(() => {
+    if (!user) {
+      setIsOpen(false);
+      setMessages([]);
+      setInput("");
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  if (!user) return null;
 
   // Cuộn xuống tin nhắn mới nhất
   const scrollToBottom = () => {
@@ -60,12 +72,12 @@ export default function FloatingChatbot() {
 
       {/* Cửa sổ Chat */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-orange-100 flex flex-col h-[500px] max-h-[80vh] animate-fade-in overflow-hidden">
+        <div className="absolute bottom-16 right-0 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-orange-100 dark:border-gray-700 flex flex-col h-[500px] max-h-[80vh] animate-fade-in overflow-hidden">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-4 text-white flex items-center justify-between">
+          <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-4 text-white flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-2xl shadow-sm">
+              <div className="w-10 h-10 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center text-2xl shadow-sm">
                 🤖
               </div>
               <div>
@@ -84,9 +96,9 @@ export default function FloatingChatbot() {
           </div>
 
           {/* Tin nhắn */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-orange-50/30 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-orange-50/30 dark:bg-gray-900/50 custom-scrollbar">
             {messages.length === 0 && (
-              <div className="text-center text-gray-400 text-sm mt-10">
+              <div className="text-center text-gray-400 dark:text-gray-500 text-sm mt-10">
                 <span className="text-4xl opacity-50 block mb-2">👋</span>
                 Hãy bắt đầu cuộc trò chuyện!
               </div>
@@ -102,10 +114,10 @@ export default function FloatingChatbot() {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex gap-1">
-                  <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                  <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                <div className="bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex gap-1">
+                  <div className="w-2 h-2 bg-gray-300 dark:bg-gray-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-300 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  <div className="w-2 h-2 bg-gray-300 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
                 </div>
               </div>
             )}
@@ -113,13 +125,13 @@ export default function FloatingChatbot() {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSend} className="p-3 border-t border-gray-100 bg-white flex items-center gap-2">
+          <form onSubmit={handleSend} className="p-3 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center gap-2 flex-shrink-0">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Nhập tin nhắn..."
-              className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
+              className="flex-1 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-950 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               disabled={isLoading}
             />
             <button

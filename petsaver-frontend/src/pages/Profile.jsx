@@ -30,7 +30,6 @@ export default function Profile() {
           id: res.data.id,
           email: res.data.email,
           displayName: res.data.displayName,
-          avatar: res.data.avatar,
           role: res.data.role
         }));
       }

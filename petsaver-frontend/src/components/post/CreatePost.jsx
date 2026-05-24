@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAvatar } from "../../utils/avatar";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function CreatePost({ onOpen }) {
   const [content, setContent] = useState("");
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user } = useContext(AuthContext);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4 border dark:border-gray-700 transition-colors">

@@ -30,7 +30,8 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
 
       if (res.data.user) {
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        const { avatar, coverImage, ...userWithoutImages } = res.data.user;
+        localStorage.setItem("user", JSON.stringify(userWithoutImages));
         setUser(res.data.user);
       }
 
@@ -43,7 +44,7 @@ export default function Login() {
         navigate("/home");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Lỗi đăng nhập", { position: "top-center" });
+      toast.error(err.response?.data?.message || err.message || "Lỗi đăng nhập", { position: "top-center" });
     } finally {
       setLoading(false);
     }

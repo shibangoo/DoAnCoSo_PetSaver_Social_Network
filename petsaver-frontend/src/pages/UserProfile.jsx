@@ -46,6 +46,9 @@ export default function UserProfile() {
       if (err.response?.status === 404) {
         toast.error("Người dùng này không khả dụng hoặc đã khóa tài khoản");
         navigate("/home");
+      } else if (err.response?.status === 403) {
+        toast.error(err.response?.data?.message || "Bạn không có quyền xem thông tin của quản trị viên");
+        navigate("/home");
       } else {
         toast.error("Không thể tải hồ sơ người dùng");
       }

@@ -8,10 +8,11 @@ import {
 } from "../icons/Symbols";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import API from "../../services/api";
 import { getUnreadCount as getMessageUnreadCount } from "../../services/message.service";
 import CreatePostModal from "../post/CreatePostModal";
+import { AuthContext } from "../../context/AuthContext";
 
 /* ================= ITEM ================= */
 function Item({ icon, text, active, badge, onClick }) {
@@ -48,7 +49,7 @@ export default function SidebarLeft() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [messageUnreadCount, setMessageUnreadCount] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user } = useContext(AuthContext);
 
   const path = location.pathname;
 

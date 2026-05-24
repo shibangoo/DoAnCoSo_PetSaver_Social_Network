@@ -72,6 +72,17 @@ io.on('connection', (socket) => {
   });
 });
 
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  console.error("API Error:", err);
+  const statusCode = err.statusCode || err.statuscode || err.status || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || "Đã xảy ra lỗi hệ thống",
+    errorCode: err.errorCode || "INTERNAL_ERROR"
+  });
+});
+
 server.listen(PORT, () => {
   console.log(`🚀 Mạng xã hội đang chạy tại: http://localhost:${PORT}`);
 });

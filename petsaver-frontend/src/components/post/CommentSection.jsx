@@ -1,14 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { getAvatar } from "../../utils/avatar";
 import API from "../../services/api";
 import toast from "react-hot-toast";
 import { FaHeart, FaRegHeart, FaReply, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function CommentSection({ postId, postAuthorId }) {
   const [comments, setComments] = useState([]);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user: rawUser } = useContext(AuthContext);
+  const user = rawUser || {};
   const commentsEndRef = useRef(null);
   
   // State for replying and editing

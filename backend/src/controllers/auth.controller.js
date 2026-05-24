@@ -223,6 +223,7 @@ exports.getUserProfile = async (req, res, next) => {
         coverImage: true,
         bio: true,
         isDeactivated: true,
+        role: true,
         pets: {
           where: { isPermanentlyDeleted: false, deletedAt: null },
           orderBy: { createdAt: 'desc' }
@@ -245,6 +246,16 @@ exports.getUserProfile = async (req, res, next) => {
 
     if (!user || user.isDeactivated) {
       return next(new AppError('Tài khoản không tồn tại hoặc đã bị khóa tạm thời', 404, 'USER_NOT_FOUND'));
+    }
+
+    // Security check: Regular user cannot view ADMIN or SUPER_ADMIN profiles
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      const reqUser = await prisma.user.findUnique({
+        where: { id: req.user.userId }
+      });
+      if (!reqUser || (reqUser.role !== 'ADMIN' && reqUser.role !== 'SUPER_ADMIN')) {
+        return next(new AppError('Bạn không có quyền xem thông tin của quản trị viên', 403, 'FORBIDDEN'));
+      }
     }
 
     const friendship = await prisma.friendship.findFirst({
@@ -381,11 +392,113 @@ exports.deleteAccount = async (req, res, next) => {
     const { password } = req.body;
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    const isMatch = await bcrypt.compare(password, user.password);
-    
-    if (!isMatch) return res.status(401).json({ message: "Mật khẩu không đúng" });
+    if (!user) {
+      return next(new AppError('Tài khoản không tồn tại', 404, 'USER_NOT_FOUND'));
+    }
 
-    await prisma.user.delete({ where: { id: userId } });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return next(new AppError('Mật khẩu không đúng', 401, 'INVALID_PASSWORD'));
+    }
+
+    // 1. Delete friendships where the user is either user1 or user2
+    await prisma.friendship.deleteMany({
+      where: {
+        OR: [
+          { user1Id: userId },
+          { user2Id: userId }
+        ]
+      }
+    });
+
+    // 2. Delete tag blocks where the user blocker or blocked
+    await prisma.tagBlock.deleteMany({
+      where: {
+        OR: [
+          { blockerId: userId },
+          { blockedId: userId }
+        ]
+      }
+    });
+
+    // 3. Delete notifications
+    await prisma.notification.deleteMany({
+      where: { userId }
+    });
+
+    // 4. Delete comment reactions
+    await prisma.commentReaction.deleteMany({
+      where: { userId }
+    });
+
+    // 5. Delete reactions
+    await prisma.reaction.deleteMany({
+      where: { userId }
+    });
+
+    // 6. Delete comment nested structures or replies first, then delete top-level comments
+    // In schema, parentId is self-referencing. To bypass SQL Server cycle, we first nullify parentIds of replies or delete them in order
+    await prisma.comment.updateMany({
+      where: { parent: { userId: userId } },
+      data: { parentId: null }
+    });
+    await prisma.comment.deleteMany({
+      where: { userId }
+    });
+
+    // 7. Delete conversation participants and messages
+    await prisma.message.deleteMany({
+      where: { senderId: userId }
+    });
+    await prisma.conversationParticipant.deleteMany({
+      where: { userId }
+    });
+
+    // 8. Delete co-owner invitations
+    await prisma.coOwnerInvitation.deleteMany({
+      where: {
+        OR: [
+          { inviterId: userId },
+          { inviteeId: userId }
+        ]
+      }
+    });
+
+    // 9. Delete pet deletion requests
+    await prisma.petDeletionRequest.deleteMany({
+      where: { coOwnerId: userId }
+    });
+
+    // 10. Delete reports sent by user
+    await prisma.report.deleteMany({
+      where: { reporterId: userId }
+    });
+
+    // 11. Delete audit logs if user is an admin
+    await prisma.auditLog.deleteMany({
+      where: { adminId: userId }
+    });
+
+    // 12. Delete pets owned by user
+    await prisma.pet.deleteMany({
+      where: {
+        OR: [
+          { ownerId: userId },
+          { coOwnerId: userId },
+          { shelterId: userId }
+        ]
+      }
+    });
+
+    // 13. Delete posts
+    await prisma.post.deleteMany({
+      where: { authorId: userId }
+    });
+
+    // 14. Finally, delete the User record itself
+    await prisma.user.delete({
+      where: { id: userId }
+    });
 
     res.status(200).json({ message: "Tài khoản đã bị xóa vĩnh viễn" });
   } catch (error) {

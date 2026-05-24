@@ -64,14 +64,14 @@ export default function AddPetModal({ isOpen, onClose, onPetAdded }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       
-      <div className="relative bg-white w-full max-w-md rounded-3xl shadow-xl p-6 animate-fade-in">
+      <div className="relative bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl shadow-xl p-6 animate-fade-in border border-transparent dark:border-gray-700">
         <h3 className="font-bold text-2xl text-center mb-6 text-gray-800 dark:text-white">Tạo Hồ Sơ Thú Cưng</h3>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Avatar Upload */}
           <div className="flex flex-col items-center gap-3">
             <div 
-              className="w-24 h-24 rounded-full border-4 border-orange-100 bg-orange-50 flex items-center justify-center cursor-pointer overflow-hidden relative group shadow-sm"
+              className="w-24 h-24 rounded-full border-4 border-orange-100 dark:border-orange-900/30 bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center cursor-pointer overflow-hidden relative group shadow-sm"
               onClick={() => fileInputRef.current?.click()}
             >
               {avatar ? (
@@ -83,7 +83,7 @@ export default function AddPetModal({ isOpen, onClose, onPetAdded }) {
                 <span className="text-white text-xs font-semibold">Đổi ảnh</span>
               </div>
             </div>
-            <span className="text-sm text-gray-500 font-medium cursor-pointer hover:text-orange-500" onClick={() => fileInputRef.current?.click()}>
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium cursor-pointer hover:text-orange-500" onClick={() => fileInputRef.current?.click()}>
               Tải ảnh lên (Tối đa 5MB)
             </span>
             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
@@ -91,33 +91,62 @@ export default function AddPetModal({ isOpen, onClose, onPetAdded }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tên thú cưng *</label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:outline-none" placeholder="VD: Milu" required />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên thú cưng *</label>
+              <input 
+                type="text" 
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange} 
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500" 
+                placeholder="VD: Milu" 
+                required 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Loài *</label>
-              <select name="species" value={formData.species} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:outline-none" required>
-                <option value="">Chọn loài...</option>
-                <option value="Chó">Chó</option>
-                <option value="Mèo">Mèo</option>
-                <option value="Khác">Khác</option>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Loài *</label>
+              <select 
+                name="species" 
+                value={formData.species} 
+                onChange={handleChange} 
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:outline-none" 
+                required
+              >
+                <option value="" className="bg-white dark:bg-gray-700">Chọn loài...</option>
+                <option value="Chó" className="bg-white dark:bg-gray-700">Chó</option>
+                <option value="Mèo" className="bg-white dark:bg-gray-700">Mèo</option>
+                <option value="Khác" className="bg-white dark:bg-gray-700">Khác</option>
               </select>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Giống (Tùy chọn)</label>
-              <input type="text" name="breed" value={formData.breed} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:outline-none" placeholder="VD: Poodle" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giống (Tùy chọn)</label>
+              <input 
+                type="text" 
+                name="breed" 
+                value={formData.breed} 
+                onChange={handleChange} 
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500" 
+                placeholder="VD: Poodle" 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tuổi (Tùy chọn)</label>
-              <input type="number" name="age" value={formData.age} onChange={handleChange} min="0" className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:outline-none" placeholder="Tính theo năm" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tuổi (Tùy chọn)</label>
+              <input 
+                type="number" 
+                name="age" 
+                value={formData.age} 
+                onChange={handleChange} 
+                min="0" 
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500" 
+                placeholder="Tính theo năm" 
+              />
             </div>
           </div>
 
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Hủy</button>
+            <button type="button" onClick={onClose} className="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 transition-all">Hủy</button>
             <button type="submit" disabled={loading} className="flex-1 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 active:scale-95 transition-all disabled:bg-gray-400">
               {loading ? "Đang xử lý..." : "Lưu Hồ Sơ"}
             </button>
