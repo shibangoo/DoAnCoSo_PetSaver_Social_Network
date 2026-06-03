@@ -52,7 +52,7 @@ export default function ReactionButton({ initialReaction, onReact }) {
       {/* BUTTON */}
       <button 
         onClick={handleToggleDefault}
-        className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors w-full text-gray-500 font-medium"
+        className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full text-gray-500 dark:text-gray-400 font-medium"
       >
         {current ? (
           <>
@@ -69,7 +69,7 @@ export default function ReactionButton({ initialReaction, onReact }) {
 
       {/* POPUP */}
       {show && (
-        <div className="absolute bottom-full left-0 mb-2 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-full px-4 py-2 flex gap-4 animate-fade-in border border-gray-100 z-10 origin-bottom-left">
+        <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-full px-4 py-2 flex gap-4 animate-fade-in border border-gray-100 dark:border-gray-700 z-10 origin-bottom-left">
           {reactions.map(r => (
             <div
               key={r.type}

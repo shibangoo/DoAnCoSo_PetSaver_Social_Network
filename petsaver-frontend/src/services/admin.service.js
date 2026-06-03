@@ -20,6 +20,10 @@ export const promoteToAdmin = async (id) => {
   return await api.patch(`/v1/admin/users/${id}/promote`);
 };
 
+export const demoteFromAdmin = async (id) => {
+  return await api.patch(`/v1/admin/users/${id}/demote`);
+};
+
 export const getReports = async (status) => {
   const query = status ? `?status=${status}` : "";
   return await api.get(`/v1/admin/reports${query}`);
@@ -27,6 +31,10 @@ export const getReports = async (status) => {
 
 export const updateReportStatus = async (id, status) => {
   return await api.patch(`/v1/admin/reports/${id}`, { status });
+};
+
+export const deleteReportedPost = async (id) => {
+  return await api.delete(`/v1/admin/reports/${id}/post`);
 };
 
 export const getAuditLogs = async () => {

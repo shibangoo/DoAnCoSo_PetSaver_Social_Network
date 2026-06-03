@@ -3,8 +3,8 @@ export default function SidebarRight() {
     <div className="sticky top-20 space-y-4">
 
       {/* GỢI Ý */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="font-semibold mb-2">Gợi ý cho bạn</h3>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-100">Gợi ý cho bạn</h3>
 
         <div className="flex items-center justify-between mb-2">
           <span>🐶 Pet Lover VN</span>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getReports, updateReportStatus } from "../../services/admin.service";
+import { getReports, updateReportStatus, deleteReportedPost } from "../../services/admin.service";
 import toast from "react-hot-toast";
-import { Flag, Check, X } from "lucide-react";
+import { Flag, Check, X, Trash2 } from "lucide-react";
 
 export default function AdminReports() {
   const [reports, setReports] = useState([]);
@@ -30,6 +30,17 @@ export default function AdminReports() {
       fetchReports();
     } catch (error) {
       toast.error(error.response?.data?.message || "Lỗi khi cập nhật");
+    }
+  };
+
+  const handleDeletePost = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết vi phạm này không?")) return;
+    try {
+      await deleteReportedPost(id);
+      toast.success("Xóa bài viết và cập nhật trạng thái thành công");
+      fetchReports();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Lỗi khi xóa bài viết");
     }
   };
 
@@ -97,6 +108,17 @@ export default function AdminReports() {
                       >
                         <Check size={16} />
                       </button>
+                      
+                      {r.targetType === 'POST' && (
+                        <button
+                          onClick={() => handleDeletePost(r.id)}
+                          className="p-1.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                          title="Xóa bài viết & Xử lý"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleUpdateStatus(r.id, "DISMISSED")}
                         className="p-1.5 bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"

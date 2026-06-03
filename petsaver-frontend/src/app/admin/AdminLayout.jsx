@@ -20,16 +20,15 @@ export default function AdminLayout() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
-    navigate("/");
+    window.location.href = "/";
   };
 
   const menuItems = [
-    { path: "/admin/dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
-    { path: "/admin/users", icon: <Users size={20} />, label: "Quản lý Người dùng" },
-    { path: "/admin/reports", icon: <Flag size={20} />, label: "Quản lý Report" },
-    { path: "/admin/audit-logs", icon: <ActivitySquare size={20} />, label: "Nhật ký Quản trị" },
-  ];
+    { path: "/admin/dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard", allowAdmin: true },
+    { path: "/admin/users", icon: <Users size={20} />, label: "Quản lý Người dùng", allowAdmin: false },
+    { path: "/admin/reports", icon: <Flag size={20} />, label: "Quản lý Report", allowAdmin: true },
+    { path: "/admin/audit-logs", icon: <ActivitySquare size={20} />, label: "Nhật ký Quản trị", allowAdmin: false },
+  ].filter(item => user?.role === 'SUPER_ADMIN' || item.allowAdmin);
 
   if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
     return (
@@ -68,6 +67,14 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <button
+            onClick={() => { window.location.href = "/home"; }}
+            className="flex w-full items-center space-x-3 px-4 py-3 rounded-xl text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+          >
+            <span className="text-xl">🏠</span>
+            <span className="font-medium">Về Mạng Xã Hội</span>
+          </button>
+
           <button
             onClick={toggleTheme}
             className="flex w-full items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"

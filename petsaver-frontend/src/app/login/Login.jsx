@@ -37,11 +37,11 @@ export default function Login() {
 
       toast.success("Đăng nhập thành công!", { position: "top-center" });
 
-      // Redirect based on role
+      // Redirect based on role (reload to prevent state issues)
       if (res.data.user && (res.data.user.role === 'ADMIN' || res.data.user.role === 'SUPER_ADMIN')) {
-        navigate("/admin/dashboard");
+        window.location.href = "/admin/dashboard";
       } else {
-        navigate("/home");
+        window.location.href = "/home";
       }
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || "Lỗi đăng nhập", { position: "top-center" });

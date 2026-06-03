@@ -69,7 +69,7 @@ export default function Profile() {
       <div className="h-56 bg-gradient-to-r from-orange-400 to-orange-500 relative">
         <button
           onClick={() => navigate("/home")}
-          className="fixed top-4 left-4 z-50 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm hover:bg-white transition"
+          className="fixed top-4 left-4 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm hover:bg-white dark:hover:bg-gray-700 transition"
         >
           ← Trang chủ
         </button>

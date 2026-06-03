@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { getUsers, banUser, unbanUser, promoteToAdmin } from "../../services/admin.service";
 import toast from "react-hot-toast";
-import { Ban, CheckCircle, ShieldAlert, UserPlus } from "lucide-react";
+import { Ban, CheckCircle, ShieldAlert, UserPlus, UserMinus } from "lucide-react";
 import { AuthContext } from "../../context/AuthContext";
 
 export default function AdminUsers() {
@@ -54,6 +54,18 @@ export default function AdminUsers() {
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.message || "Lỗi khi cấp quyền Admin");
+    }
+  };
+
+  const handleDemote = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn muốn hủy quyền Admin của người dùng này?")) return;
+    try {
+      const { demoteFromAdmin } = await import("../../services/admin.service");
+      await demoteFromAdmin(id);
+      toast.success("Hủy quyền Admin thành công");
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Lỗi khi hủy quyền Admin");
     }
   };
 
@@ -141,6 +153,15 @@ export default function AdminUsers() {
                           className="px-3 py-1.5 text-sm bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors font-medium flex items-center gap-1"
                         >
                           <UserPlus size={14} /> Lên Admin
+                        </button>
+                      )}
+                      
+                      {currentUser?.role === 'SUPER_ADMIN' && u.role === 'ADMIN' && (
+                        <button
+                          onClick={() => handleDemote(u.id)}
+                          className="px-3 py-1.5 text-sm bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors font-medium flex items-center gap-1"
+                        >
+                          <UserMinus size={14} /> Hủy Admin
                         </button>
                       )}
                     </div>

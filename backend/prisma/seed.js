@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 async function main() {
   const superAdminEmail = 'superadmin@petsaver.com';
-  
+
   const existingSuperAdmin = await prisma.user.findUnique({
     where: { email: superAdminEmail }
   });

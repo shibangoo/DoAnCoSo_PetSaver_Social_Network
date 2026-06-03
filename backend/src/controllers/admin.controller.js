@@ -214,6 +214,42 @@ exports.promoteToAdmin = async (req, res) => {
   }
 };
 
+exports.demoteFromAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const targetUserId = parseInt(id);
+
+    const user = await prisma.user.findUnique({ where: { id: targetUserId } });
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng." });
+
+    if (user.role === "SUPER_ADMIN") {
+      return res.status(403).json({ message: "Không thể giáng chức SUPER_ADMIN." });
+    }
+
+    if (user.role === "USER") {
+      return res.status(400).json({ message: "Người dùng đã là USER bình thường." });
+    }
+
+    await prisma.user.update({
+      where: { id: targetUserId },
+      data: { role: "USER" }
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        adminId: req.user.userId || req.user.id,
+        action: "DEMOTE_ADMIN",
+        details: JSON.stringify({ targetUserId, email: user.email })
+      }
+    });
+
+    res.status(200).json({ message: "Đã giáng chức thành công." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Lỗi hệ thống khi giáng chức Admin." });
+  }
+};
+
 exports.getReports = async (req, res) => {
   try {
     const { status } = req.query;
@@ -262,6 +298,38 @@ exports.updateReport = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Lỗi hệ thống khi cập nhật báo cáo." });
+  }
+};
+
+exports.deleteReportedPost = async (req, res) => {
+  try {
+    const { id } = req.params; // report id
+    const report = await prisma.report.findUnique({ where: { id: parseInt(id) } });
+
+    if (!report) return res.status(404).json({ message: "Không tìm thấy báo cáo." });
+    if (report.targetType !== "POST") return res.status(400).json({ message: "Báo cáo này không phải về bài viết." });
+
+    // Delete the post
+    await prisma.post.delete({ where: { id: report.targetId } }).catch(() => null);
+
+    // Mark report as resolved
+    const updatedReport = await prisma.report.update({
+      where: { id: parseInt(id) },
+      data: { status: "RESOLVED" }
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        adminId: req.user.userId || req.user.id,
+        action: "DELETE_REPORTED_POST",
+        details: JSON.stringify({ reportId: report.id, postId: report.targetId })
+      }
+    });
+
+    res.status(200).json({ message: "Đã xóa bài viết và cập nhật báo cáo thành công.", data: updatedReport });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Lỗi hệ thống khi xóa bài viết báo cáo." });
   }
 };
 

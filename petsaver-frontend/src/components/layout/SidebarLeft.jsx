@@ -133,6 +133,15 @@ export default function SidebarLeft() {
           onClick={() => navigate("/settings")}
         />
 
+        {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
+          <Item
+            icon={<div className="text-xl">👑</div>}
+            text="Admin Panel"
+            active={false}
+            onClick={() => { window.location.href = "/admin/dashboard"; }}
+          />
+        )}
+
       </div>
 
       {/* BUTTON */}
