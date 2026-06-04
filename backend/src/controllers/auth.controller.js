@@ -125,7 +125,7 @@ exports.updateProfile = async (req, res, next) => {
         ...(avatar !== undefined && { avatar }),
         ...(coverImage !== undefined && { coverImage }),
         ...(displayName !== undefined && { displayName }),
-        ...(dob !== undefined && { dob: new Date(dob) }),
+        ...(dob !== undefined && { dob: dob ? new Date(dob) : null }),
         ...(bio !== undefined && { bio })
       },
       select: { id: true, email: true, displayName: true, avatar: true, coverImage: true, dob: true, bio: true }

@@ -109,7 +109,7 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ảnh đại diện (Avatar)</label>
             <input 
               type="file" 
-              accept="image/*"
+              accept=".jpg, .jpeg, .png, .gif"
               onChange={(e) => handleFileChange(e, 'avatar')}
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-500 hover:file:bg-orange-100"
             />
@@ -119,7 +119,7 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ảnh bìa (Cover Image)</label>
             <input 
               type="file" 
-              accept="image/*"
+              accept=".jpg, .jpeg, .png, .gif"
               onChange={(e) => handleFileChange(e, 'coverImage')}
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-500 hover:file:bg-orange-100"
             />

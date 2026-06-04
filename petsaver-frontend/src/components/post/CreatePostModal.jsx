@@ -363,7 +363,7 @@ export default function CreatePostModal({ isOpen, onClose, user }) {
               <input 
                 type="file" 
                 multiple
-                accept="image/*,video/*" 
+                accept=".jpg, .jpeg, .png, .gif, .mp4, .mov, .avi" 
                 className="hidden" 
                 ref={fileInputRef}
                 onChange={handleImageChange}

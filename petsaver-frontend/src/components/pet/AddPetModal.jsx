@@ -86,7 +86,7 @@ export default function AddPetModal({ isOpen, onClose, onPetAdded }) {
             <span className="text-sm text-gray-500 dark:text-gray-400 font-medium cursor-pointer hover:text-orange-500" onClick={() => fileInputRef.current?.click()}>
               Tải ảnh lên (Tối đa 5MB)
             </span>
-            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
+            <input type="file" accept=".jpg, .jpeg, .png, .gif" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
